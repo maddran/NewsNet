@@ -1,56 +1,185 @@
 import pandas as pd
+pd.options.mode.chained_assignment = None
+
 from sqlalchemy import *
 import requests
 from datetime import datetime, timedelta
 import gzip
 import shutil
 import os
-from tqdm import tqdm
+import argparse
 
+from tqdm import tqdm
+tqdm.pandas();
+
+from fuzzywuzzy import process, fuzz
+import tldextract
+import dask
+
+
+def download(url: str, fname: str):
+    resp = requests.get(url, stream=True)
+    total = int(resp.headers.get('content-length', 0))
+    with open(fname, 'wb') as file, tqdm(desc=fname,
+                                            total=total,
+                                            unit='iB',
+                                            unit_scale=True,
+                                            unit_divisor=1024,
+                                        ) as bar:
+        for data in resp.iter_content(chunk_size=1024):
+            size = file.write(data)
+            bar.update(size)
 
 def get_GDELT_data(date):
-  date_string = date.strftime("%Y%m%d%H%M%S")
-  url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
+    url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
 
-  filename = url.split("/")[-1]
-  with open(filename, "wb") as f:
-      r = requests.get(url)
-      f.write(r.content)
-      
-  fileout = filename.split(".")[0] + ".txt"
+    filename = f"data/{url.split('/')[-1]}"
 
-  with gzip.open(filename, 'rb') as f_in:
-      with open(fileout, 'wb') as f_out:
-          shutil.copyfileobj(f_in, f_out)
+    download(url, filename)
 
-  os.remove(filename)
+    print(f"Saved {filename.split('/')[1]}...")
+        
+    fileout = filename.split(".")[0] + ".txt"
 
-  return fileout
+    with gzip.open(filename, 'rb') as f_in:
+        with open(fileout, 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+    os.remove(filename)
+
+    print(f"Deleted {filename.split('/')[1]} and saved {fileout.split('/')[1]}...")
+
+    return fileout
 
 def populate_sql(file):
 
-  j = 1
-  chunksize = 10000
-  db_file = f"{file.split('.')[0]}.db"
-  
-  if os.path.exists(db_file):
-    os.remove(db_file)
+    j = 1
+    chunksize = 10000
+    db_file = f"{file.split('.')[0]}.db"
 
-  db_path = f"sqlite:///{db_file}"
-  urls_database = create_engine(db_path)
+    if os.path.exists(db_file):
+        os.remove(db_file)
 
-  for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, 
+    db_path = f"sqlite:///{db_file}"
+    urls_database = create_engine(db_path)
+
+    for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, 
                         sep='\t', header=None, error_bad_lines = False), total = 1000):
-    df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
-    df.index += j
-    df.to_sql("urls_table", urls_database, if_exists='append')
-    j = df.index[-1] + 1
+        df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
+        df.index += j
+        df.to_sql("urls_table", urls_database, if_exists='append')
+        j = df.index[-1] + 1
 
-    # if j>100e6:
-    #   print(f"****BREAKING at {j} lines read! Remove in production!****")
-    #   break
 
-  urls_database.execute("CREATE INDEX urls_index ON urls_table(FrontPageURL)")
+    urls_database.execute("CREATE INDEX urls_index ON urls_table(FrontPageURL)")
+
+    os.remove(file)
+    return (db_path, j)
+
+def extract_domain(url):
+    try:
+        extract = tldextract.extract(url)
+        return '.'.join(extract)
+    except:
+        return
+
+def get_target_sources(filepath = None):
+    if filepath == None:
+        filepath = 'sources_emm.csv'
+
+    target_sources = pd.read_csv(filepath, delimiter='\t', keep_default_na=False)
+    target_sources["top_level_domain"] = [extract_domain(url) for url in target_sources.url]
+    target_sources = target_sources[pd.notna(target_sources['top_level_domain'])]
     
-  os.remove(file)
-  return (db_path, j)
+    
+
+    return target_sources
+
+def get_matches(match_row, idx_LU = get_target_sources()):
+    to_match_url = match_row.gdelt_url
+    to_match_tld = match_row.top_level_domain
+    LU = list(idx_LU.url)
+
+    if to_match_url in LU:
+        return (LU.index(to_match_url), to_match_url, 100.0)
+    else:
+        filtered_LU = list(idx_LU[idx_LU.top_level_domain == to_match_tld].url)
+        match = process.extractOne(to_match_url, filtered_LU, scorer = fuzz.ratio)
+        return (LU.index(match[0]), match[0], match[1])
+
+def match_urls(urls_database, target_sources):  
+    query = """SELECT DISTINCT FrontPageURL FROM urls_table"""
+    unique_frontPage_urls = pd.read_sql_query(query, urls_database)
+    unique_frontPage_urls['top_level_domain'] = [extract_domain(url) for url in unique_frontPage_urls.FrontPageURL]
+
+    common = sorted(set(target_sources["top_level_domain"]).intersection(set(unique_frontPage_urls["top_level_domain"])))
+
+    common_urls = unique_frontPage_urls[unique_frontPage_urls["top_level_domain"].isin(common)].reset_index(drop=True)
+    common_urls.columns = ["gdelt_url"]+list(common_urls.columns[1:])
+
+    # tqdm.pandas()
+
+    matched_urls = common_urls.copy()
+    matched_urls["matched_idx"], matched_urls["emm_url"], matched_urls["match_score"] = zip(*common_urls.apply(get_matches, axis = 1))
+
+    matched_urls = matched_urls[matched_urls.match_score >= 97.0] \
+                    .sort_values('match_score', ascending=False) \
+                    .drop_duplicates('matched_idx', keep="first") \
+                    .set_index("matched_idx").sort_index()
+
+    return matched_urls
+
+def get_article_links(source, urls_database):
+    gdelt_url = f'"{source.gdelt_url}"'
+    tld = source.top_level_domain
+    query = f"""SELECT LinkURL FROM urls_table WHERE FrontPageURL = {gdelt_url}"""
+    links = pd.read_sql_query(query, urls_database)
+    links['top_level_domain'] = links['LinkURL'].map(extract_domain)
+    return list(set(links[links.top_level_domain == tld].LinkURL))
+
+def get_urls (date, target_sources_path = None):
+    print(f"\nDownloading GDELT data for {date.strftime('%Y-%m-%d %H:%M:%S')}")
+    date_string = date.strftime("%Y%m%d%H%M%S")
+
+    db_path = f"data/{date_string}.db"
+    if os.path.exists(db_path):
+        db_file = f"sqlite:///{db_path}"
+        print(f"\tDB file {db_file} exists! Continuing...")
+    else:
+        filename = get_GDELT_data(date_string)
+        print(f"\nCreating SQLite DB...")
+        db_file, count = populate_sql(filename)
+        print(f"DB file {db_file} saved with {count} lines successfuly parsed")
+    
+    urls_database = create_engine(db_file)
+
+    print("\nGetting target sources...")
+    target_sources = get_target_sources(target_sources_path)
+
+    print("\nMatching target and GDELT URLs...")
+    matched_urls = match_urls(urls_database, target_sources)
+
+    data = target_sources.iloc[matched_urls.index,:]
+    data['gdelt_url'] = matched_urls.gdelt_url
+    data.reset_index(inplace=True)
+
+    print("\nCollecting article URLs...")
+    data['article_links'] = data.progress_apply(lambda x: get_article_links(x, urls_database), axis=1)
+
+    urls_path = f"{db_path.split('.')[0]}_urls.pkl"
+    print(f"\nSaving URLs to {urls_path}...")
+    data.to_pickle(urls_path)
+    return data
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-start_date", 
+                        help="the start date of the period you'd like to collect URLs form")
+    args = parser.parse_args()
+
+    start_date = datetime(2020, 9, 1, 9)
+    num_days = 1
+    for i in range(num_days):
+        date = (start_date + timedelta(i))
+        data = get_urls(date)
+        print("poop")
