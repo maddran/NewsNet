@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import gzip
 import shutil
 import os
+import sys
 import argparse
 
 from tqdm import tqdm
@@ -89,7 +90,8 @@ def extract_domain(url):
 
 def get_target_sources(filepath = None):
     if filepath == None:
-        filepath = 'sources_emm.csv'
+        cwd = os.path.dirname(os.path.abspath(sys.argv[0]))
+        filepath = f'{cwd}/sources_emm.csv'
 
     target_sources = pd.read_csv(filepath, delimiter='\t', keep_default_na=False)
     target_sources["top_level_domain"] = [extract_domain(url) for url in target_sources.url]
@@ -154,8 +156,9 @@ def get_article_links(source, urls_database):
     return list(set(links[links.top_level_domain == tld].LinkURL))
 
 @dask.delayed
-def collect_urls(matched):
+def collect_urls(matched, db_file):
     print("\nCollecting article URLs...")
+    urls_database = create_engine(db_file)
     res = matched.copy()
     res['article_links'] = res.apply(lambda x: get_article_links(x, urls_database), axis=1)
     return res
@@ -181,7 +184,7 @@ def get_urls (dates, target_sources_path = None):
         # res.append(matched)
 
         
-        urls = collect_urls(matched)
+        urls = collect_urls(matched, db_file)
         # res.append(urls)
 
         urls_path = f"{db_path.split('.')[0]}_urls.pkl"
@@ -198,7 +201,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_date = datetime(2020, 9, 1, 9)
-    num_days = 7
+    num_days = 1
     dates = [start_date + timedelta(i) for i in range(num_days)]
     # dask.visualize(get_urls(dates), filename='graph.svg')
     out = dask.compute(get_urls(dates))
