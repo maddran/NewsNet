@@ -85,6 +85,8 @@ def populate_sql(file):
     urls_database.execute("CREATE INDEX urls_index ON urls_table(FrontPageURL)")
 
     os.remove(file)
+
+    print(f"DB file {db_file} saved")
     return db_path
 
 def extract_domain(url):
@@ -167,6 +169,13 @@ def collect_urls(matched, db_file):
     res['article_links'] = res.apply(lambda x: get_article_links(x, urls_database), axis=1)
     return res
 
+@dask.delayed
+def save_urls(urls, date_string):
+    urls_path = f"{cwd()}/data/{date_string}_urls.pkl"
+    print(f"\nSaving URLs to {urls_path}...")
+    urls.to_pickle(urls_path)
+    return urls_path
+
 
 def get_urls (dates, target_sources_path = None):
     res = []
@@ -181,37 +190,37 @@ def get_urls (dates, target_sources_path = None):
         else:
             filename = get_GDELT_data(date_string)
             db_file = populate_sql(filename)
-            print(f"DB file {db_file} saved")
+            
 
         
         matched = match_urls(db_file, target_sources_path)
         # res.append(matched)
-
         
         urls = collect_urls(matched, db_file)
         # res.append(urls)
 
-        urls_path = f"{db_path.split('.')[0]}_urls.pkl"
-        print(f"\nSaving URLs to {urls_path}...")
-        urls.to_pickle(urls_path)
-        res.append(urls)
+        urls_path = save_urls(urls, date_string)
+        res.append(urls_path)
 
     return res
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-start_date", 
-                        help="the start date of the period you'd like to collect URLs form")
+    parser.add_argument("--start_date", required=True, type=int,
+                        help="the start date of the period to collect (yyyymmdd)")
+    parser.add_argument("--num_days", required=True, type=int,
+                        help="num days from start date to collect")
+    parser.add_argument("--time_of_day", required=False, type=int, default = 9,
+                        help="time of day to collect links (only whole hours in 24h format)")
     args = parser.parse_args()
 
-    start_date = datetime(2020, 9, 1, 9)
-    num_days = 1
+    start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
+    start_date = start_date.replace(hour = args.time_of_day)
+    num_days = args.num_days
     dates = [start_date + timedelta(i) for i in range(num_days)]
+    print(dates)
+
     # dask.visualize(get_urls(dates), filename='graph.svg')
     out = dask.compute(get_urls(dates))
-
+    # print(out)
     
-    # for i in range(num_days):
-    #     date = (start_date + timedelta(i))
-    #     data = get_urls(date)
-    #     print("poop")
