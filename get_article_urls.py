@@ -37,8 +37,11 @@ def download(url: str, fname: str):
 @dask.delayed
 def get_GDELT_data(date_string):
 
-    if not os.path.exists(f"{cwd()}/data"):
+    # if not os.path.exists(f"{cwd()}/data"):
+    try:
         os.mkdir(f"{cwd()}/data")
+    except:
+        pass
 
     url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
 
