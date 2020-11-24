@@ -20,7 +20,7 @@ import dask
 def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
     total = int(resp.headers.get('content-length', 0))
-    with open(fname, 'wb') as file, tqdm(desc=fname,
+    with open(fname, 'wb') as file, tqdm(desc=f"\nDownloading GDELT data for {date.strftime('%Y-%m-%d %H:%M:%S')}",
                                             total=total,
                                             unit='iB',
                                             unit_scale=True,
@@ -30,7 +30,9 @@ def download(url: str, fname: str):
             size = file.write(data)
             bar.update(size)
 
-def get_GDELT_data(date):
+@dask.delayed
+def get_GDELT_data(date_string):
+
     url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
 
     filename = f"data/{url.split('/')[-1]}"
@@ -51,7 +53,9 @@ def get_GDELT_data(date):
 
     return fileout
 
+@dask.delayed
 def populate_sql(file):
+    print(f"\nCreating SQLite DB...")
 
     j = 1
     chunksize = 10000
@@ -74,7 +78,7 @@ def populate_sql(file):
     urls_database.execute("CREATE INDEX urls_index ON urls_table(FrontPageURL)")
 
     os.remove(file)
-    return (db_path, j)
+    return db_path
 
 def extract_domain(url):
     try:
@@ -90,8 +94,6 @@ def get_target_sources(filepath = None):
     target_sources = pd.read_csv(filepath, delimiter='\t', keep_default_na=False)
     target_sources["top_level_domain"] = [extract_domain(url) for url in target_sources.url]
     target_sources = target_sources[pd.notna(target_sources['top_level_domain'])]
-    
-    
 
     return target_sources
 
@@ -107,7 +109,16 @@ def get_matches(match_row, idx_LU = get_target_sources()):
         match = process.extractOne(to_match_url, filtered_LU, scorer = fuzz.ratio)
         return (LU.index(match[0]), match[0], match[1])
 
-def match_urls(urls_database, target_sources):  
+@dask.delayed
+def match_urls(db_file, target_sources_path):  
+
+    print("\nMatching target and GDELT URLs...")
+
+    urls_database = create_engine(db_file)
+
+    print("\nGetting target sources...")
+    target_sources = get_target_sources(target_sources_path)
+
     query = """SELECT DISTINCT FrontPageURL FROM urls_table"""
     unique_frontPage_urls = pd.read_sql_query(query, urls_database)
     unique_frontPage_urls['top_level_domain'] = [extract_domain(url) for url in unique_frontPage_urls.FrontPageURL]
@@ -127,7 +138,12 @@ def match_urls(urls_database, target_sources):
                     .drop_duplicates('matched_idx', keep="first") \
                     .set_index("matched_idx").sort_index()
 
-    return matched_urls
+    res = target_sources.iloc[matched_urls.index,:]
+    res['gdelt_url'] = matched_urls.gdelt_url
+    res.reset_index(inplace=True)
+
+    return res
+    
 
 def get_article_links(source, urls_database):
     gdelt_url = f'"{source.gdelt_url}"'
@@ -137,39 +153,43 @@ def get_article_links(source, urls_database):
     links['top_level_domain'] = links['LinkURL'].map(extract_domain)
     return list(set(links[links.top_level_domain == tld].LinkURL))
 
-def get_urls (date, target_sources_path = None):
-    print(f"\nDownloading GDELT data for {date.strftime('%Y-%m-%d %H:%M:%S')}")
-    date_string = date.strftime("%Y%m%d%H%M%S")
-
-    db_path = f"data/{date_string}.db"
-    if os.path.exists(db_path):
-        db_file = f"sqlite:///{db_path}"
-        print(f"\tDB file {db_file} exists! Continuing...")
-    else:
-        filename = get_GDELT_data(date_string)
-        print(f"\nCreating SQLite DB...")
-        db_file, count = populate_sql(filename)
-        print(f"DB file {db_file} saved with {count} lines successfuly parsed")
-    
-    urls_database = create_engine(db_file)
-
-    print("\nGetting target sources...")
-    target_sources = get_target_sources(target_sources_path)
-
-    print("\nMatching target and GDELT URLs...")
-    matched_urls = match_urls(urls_database, target_sources)
-
-    data = target_sources.iloc[matched_urls.index,:]
-    data['gdelt_url'] = matched_urls.gdelt_url
-    data.reset_index(inplace=True)
-
+@dask.delayed
+def collect_urls(matched):
     print("\nCollecting article URLs...")
-    data['article_links'] = data.progress_apply(lambda x: get_article_links(x, urls_database), axis=1)
+    res = matched.copy()
+    res['article_links'] = res.apply(lambda x: get_article_links(x, urls_database), axis=1)
+    return res
 
-    urls_path = f"{db_path.split('.')[0]}_urls.pkl"
-    print(f"\nSaving URLs to {urls_path}...")
-    data.to_pickle(urls_path)
-    return data
+
+def get_urls (dates, target_sources_path = None):
+    res = []
+    for date in dates:
+        
+        date_string = date.strftime("%Y%m%d%H%M%S")
+
+        db_path = f"data/{date_string}.db"
+        if os.path.exists(db_path):
+            db_file = f"sqlite:///{db_path}"
+            print(f"\tDB file {db_file} exists! Continuing...")
+        else:
+            filename = get_GDELT_data(date_string)
+            db_file = populate_sql(filename)
+            print(f"DB file {db_file} saved")
+
+        
+        matched = match_urls(db_file, target_sources_path)
+        # res.append(matched)
+
+        
+        urls = collect_urls(matched)
+        # res.append(urls)
+
+        urls_path = f"{db_path.split('.')[0]}_urls.pkl"
+        print(f"\nSaving URLs to {urls_path}...")
+        urls.to_pickle(urls_path)
+        res.append(urls)
+
+    return res
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -178,8 +198,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_date = datetime(2020, 9, 1, 9)
-    num_days = 1
-    for i in range(num_days):
-        date = (start_date + timedelta(i))
-        data = get_urls(date)
-        print("poop")
+    num_days = 7
+    dates = [start_date + timedelta(i) for i in range(num_days)]
+    # dask.visualize(get_urls(dates), filename='graph.svg')
+    out = dask.compute(get_urls(dates))
+
+    
+    # for i in range(num_days):
+    #     date = (start_date + timedelta(i))
+    #     data = get_urls(date)
+    #     print("poop")
