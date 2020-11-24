@@ -89,7 +89,7 @@ def extract_domain(url):
 
 def get_target_sources(filepath = None):
     if filepath == None:
-        filepath = 'sources_emm.csv'
+        filepath = '~/sources_emm.csv'
 
     target_sources = pd.read_csv(filepath, delimiter='\t', keep_default_na=False)
     target_sources["top_level_domain"] = [extract_domain(url) for url in target_sources.url]
