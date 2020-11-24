@@ -11,12 +11,15 @@ import sys
 import argparse
 
 from tqdm import tqdm
-tqdm.pandas();
+tqdm.pandas()
 
 from fuzzywuzzy import process, fuzz
 import tldextract
 import dask
 
+
+def cwd():
+    return os.path.dirname(os.path.abspath(sys.argv[0]))
 
 def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
@@ -33,6 +36,9 @@ def download(url: str, fname: str):
 
 @dask.delayed
 def get_GDELT_data(date_string):
+
+    if not os.path.exists(f"{cwd()}/data"):
+        os.mkdir(f"{cwd()}/data")
 
     url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
 
@@ -90,8 +96,7 @@ def extract_domain(url):
 
 def get_target_sources(filepath = None):
     if filepath == None:
-        cwd = os.path.dirname(os.path.abspath(sys.argv[0]))
-        filepath = f'{cwd}/sources_emm.csv'
+        filepath = f'{cwd()}/sources_emm.csv'
 
     target_sources = pd.read_csv(filepath, delimiter='\t', keep_default_na=False)
     target_sources["top_level_domain"] = [extract_domain(url) for url in target_sources.url]
@@ -114,13 +119,12 @@ def get_matches(match_row, idx_LU = get_target_sources()):
 @dask.delayed
 def match_urls(db_file, target_sources_path):  
 
-    print("\nMatching target and GDELT URLs...")
-
     urls_database = create_engine(db_file)
 
     print("\nGetting target sources...")
     target_sources = get_target_sources(target_sources_path)
 
+    print("\nMatching target and GDELT URLs...")
     query = """SELECT DISTINCT FrontPageURL FROM urls_table"""
     unique_frontPage_urls = pd.read_sql_query(query, urls_database)
     unique_frontPage_urls['top_level_domain'] = [extract_domain(url) for url in unique_frontPage_urls.FrontPageURL]
