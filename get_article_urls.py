@@ -45,11 +45,11 @@ def get_GDELT_data(date_string):
 
     url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
 
-    filename = f"data/{url.split('/')[-1]}"
+    filename = f"{cwd()}/data/{url.split('/')[-1]}"
 
     download(url, filename)
 
-    print(f"Saved {filename.split('/')[1]}...")
+    print(f"Saved {filename}...")
         
     fileout = filename.split(".")[0] + ".txt"
 
