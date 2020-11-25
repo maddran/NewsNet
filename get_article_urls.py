@@ -24,7 +24,8 @@ def cwd():
 def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
     total = int(resp.headers.get('content-length', 0))
-    with open(fname, 'wb') as file, tqdm(desc=f"\nDownloading {fname}",
+    with open(fname, 'wb') as file, tqdm(desc=f"Downloading {fname.split('/')[-1]}",
+                                            position = 0,
                                             total=total,
                                             unit='iB',
                                             unit_scale=True,
@@ -68,7 +69,7 @@ def populate_sql(file):
     print(f"\nCreating SQLite DB from {file}...")
 
     j = 1
-    chunksize = intt(1e6)
+    chunksize = int(1e6)
     db_file = f"{file.split('.')[0]}.db"
 
     if os.path.exists(db_file):
@@ -78,7 +79,8 @@ def populate_sql(file):
     urls_database = create_engine(db_path)
 
     for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, 
-                        sep='\t', header=None, error_bad_lines = False), total = 10):
+                                sep='\t', header=None, error_bad_lines = False), 
+                    desc=f"Populating {db_path.split('/')[-1]}", total = 10):
         df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
         df.index += j
         df.to_sql("urls_table", urls_database, if_exists='append')
@@ -173,8 +175,7 @@ def collect_urls(matched, db_file):
     return res
 
 @dask.delayed
-def save_urls(urls, date_string):
-    urls_path = f"{cwd()}/data/{date_string}_urls.pkl"
+def save_urls(urls, urls_path):
     print(f"\nSaving URLs to {urls_path}...")
     urls.to_pickle(urls_path)
     return urls_path
@@ -186,7 +187,7 @@ def get_urls (dates, target_sources_path = None):
         
         date_string = date.strftime("%Y%m%d%H%M%S")
 
-        db_path = f"data/{date_string}.db"
+        db_path = f"{cwd()}/data/{date_string}.db"
         if os.path.exists(db_path):
             db_file = f"sqlite:///{db_path}"
             print(f"\tDB file {db_file} exists! Continuing...")
@@ -194,15 +195,14 @@ def get_urls (dates, target_sources_path = None):
             filename = get_GDELT_data(date_string)
             db_file = populate_sql(filename)
             
+        urls_path = f"{cwd()}/data/{date_string}_urls.pkl"
+        if os.path.exists(db_path): 
+            print(f"\tURL file {date_string}_urls.pkl exists! Continuing...")
+        else:
+            matched = match_urls(db_file, target_sources_path)
+            urls = collect_urls(matched, db_file)
+            urls_path = save_urls(urls, urls_path)
 
-        
-        matched = match_urls(db_file, target_sources_path)
-        # res.append(matched)
-        
-        urls = collect_urls(matched, db_file)
-        # res.append(urls)
-
-        urls_path = save_urls(urls, date_string)
         res.append(urls_path)
 
     return res
@@ -220,8 +220,8 @@ if __name__ == "__main__":
     start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
     start_date = start_date.replace(hour = args.time_of_day)
     num_days = args.num_days
-    dates = [start_date + timedelta(i) for i in range(num_days)]
-    print(dates)
+    dates = [start_date + timedelta(i) for i in range(-2, num_days)]
+    # print(dates)
 
     # dask.visualize(get_urls(dates), filename='graph.svg')
     out = dask.compute(get_urls(dates))
