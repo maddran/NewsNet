@@ -24,7 +24,7 @@ def cwd():
 def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
     total = int(resp.headers.get('content-length', 0))
-    with open(fname, 'wb') as file, tqdm(desc=f"\nDownloading GDELT data for {date.strftime('%Y-%m-%d %H:%M:%S')}",
+    with open(fname, 'wb') as file, tqdm(desc=f"\nDownloading {fname}}",
                                             total=total,
                                             unit='iB',
                                             unit_scale=True,
