@@ -68,7 +68,7 @@ def populate_sql(file):
     print(f"\nCreating SQLite DB from {file}...")
 
     j = 1
-    chunksize = 10000
+    chunksize = intt(1e6)
     db_file = f"{file.split('.')[0]}.db"
 
     if os.path.exists(db_file):
@@ -78,7 +78,7 @@ def populate_sql(file):
     urls_database = create_engine(db_path)
 
     for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, 
-                        sep='\t', header=None, error_bad_lines = False), total = 950):
+                        sep='\t', header=None, error_bad_lines = False), total = 10):
         df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
         df.index += j
         df.to_sql("urls_table", urls_database, if_exists='append')
