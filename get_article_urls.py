@@ -59,13 +59,13 @@ def get_GDELT_data(date_string):
 
     os.remove(filename)
 
-    print(f"Deleted {filename.split('/')[1]} and saved {fileout.split('/')[1]}...")
+    print(f"\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
 
     return fileout
 
 @dask.delayed
 def populate_sql(file):
-    print(f"\nCreating SQLite DB...")
+    print(f"\nCreating SQLite DB from {file}...")
 
     j = 1
     chunksize = 10000
@@ -78,7 +78,7 @@ def populate_sql(file):
     urls_database = create_engine(db_path)
 
     for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, 
-                        sep='\t', header=None, error_bad_lines = False), total = 1000):
+                        sep='\t', header=None, error_bad_lines = False), total = 950):
         df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
         df.index += j
         df.to_sql("urls_table", urls_database, if_exists='append')
