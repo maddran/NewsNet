@@ -26,7 +26,6 @@ def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
     total = int(resp.headers.get('content-length', 0))
     with open(fname, 'wb') as file, tqdm(desc=f"Downloading {fname.split('/')[-1]}",
-                                            position = 0,
                                             total=total,
                                             unit='iB',
                                             unit_scale=True,
@@ -251,16 +250,21 @@ def get_urls(dates, target_sources_path=None):
 
 
 def main(args):
+    from dask.distributed import Client
+    client = Client()
+
     start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
     start_date = start_date.replace(hour=args.time_of_day)
     num_days = args.num_days
     dates = [start_date + timedelta(i) for i in range(-2, num_days)]
 
-    # dask.visualize(get_urls(dates), filename='get_article_graph.svg')
-    urlfiles = sorted(dask.compute(get_urls(dates))[0])
+    dask.visualize(get_urls(dates), filename='get_article_graph.svg')
+    urlfiles = get_urls(dates)
+    dask.compute(*urlfiles)
+    urlfiles = sorted(urlfiles)
 
-    rng = list(range(len(urlfiles)))[2:]
-    _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
+    # rng = list(range(len(urlfiles)))[2:]
+    # _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
 
     print("\n\nDone!\n\n")
 
