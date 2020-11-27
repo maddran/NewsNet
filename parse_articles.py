@@ -22,6 +22,7 @@ def cwd():
     return os.path.dirname(os.path.abspath(sys.argv[0]))
 
 
+# @dask.delayed
 def parse_html(article):
     soup = BeautifulSoup(article['html'], features="lxml")
 
@@ -58,6 +59,7 @@ def parse_date(soup):
     return date
 
 
+
 def parse_date_tag(tag):
     try:
       date = tag['datetime']
@@ -92,6 +94,7 @@ def extract_domain(url):
         return
 
 
+# @dask.delayed
 def process_links(article):
     raw_links = article["raw_links"]
     url = article["url"]
@@ -108,8 +111,8 @@ def process_links(article):
 
     return article
 
-@dask.delayed
-def get_article(url, lang):
+# @dask.delayed
+def get_article(url):
     article = Article(url, keep_article_html=True)
     try:
         article.download()
@@ -125,14 +128,12 @@ def get_article(url, lang):
     parsed_article['title'] = article.title
     parsed_article['date'] = article.publish_date
     parsed_article['html'] = article.html
-    parsed_article['text'] = article.text
-
-    parsed_article = parse_html(parsed_article)
-    parsed_article = translate(parsed_article, lang)
-    
+    parsed_article['text'] = article.text    
 
     return parsed_article
 
+
+# @dask.delayed
 def translate(article, lang):
 
     if lang == "en":
@@ -151,49 +152,61 @@ def translate(article, lang):
     return article
 
 
-def parse_articles(pruned):
-    parsed = []
-    for i, row in pruned.iterrows():
-        urls = row["article_links"]
-        name = row["name"]
-        lang = row["lang_short"]
-        tld = row["top_level_domain"]
+def write_parsed(parsed, filename):
+    try:
+        parsed.to_pickle(filename)
+        print(f"\n\nSaved articles to {filename}\n")
+    except Exception as e:
+        print(e)
+        print(f"\n\nFailed to write file. Continuing...\n")
 
-        parsed_articles = [get_article(url, lang) for url in tqdm(urls, position=0, desc=str(name))]
 
-        if parsed_articles and len(parsed_articles) > 0:
-            res = parsed_articles #pd.DataFrame(parsed_articles)
+def parse_article(row):
+   
+    url = row["article_links"]
+    name = row["name"]
+    lang = row["lang_short"]
+    tld = row["top_level_domain"]
 
-            try:
-                if not os.path.exists("parsed"):
-                    os.mkdir("parsed")
+    parsed_article = get_article(url) #[get_article(url, lang) for url in urls]
+    if parsed_article:
+        parsed_article = parse_html(parsed_article)#[parse_html(pa) for pa in parsed_articles]
+        parsed_article = translate(parsed_article, lang)#[translate(pa, lang) for pa in parsed_articles]
+        
+    row['parsed_article'] = parsed_article
 
-                filename = f"parsed/{row.name}.pkl"
-                # res.to_pickle(filename)
-                # with open(filename, 'wb') as handle:
-                #     pickle.dump(res, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                print(f"\n\nSaved {name} articles to {filename}\n")
-                parsed.append(res)
-            except Exception as e:
-                print(e)
-                print(f"\n\nFailed to parse {name}. Continuing...\n")
-
-    return parsed
-
+    return row
 
 
 def launch_dash(urlfile):
-    # from dask.distributed import Client
-    # client = Client()
+    from dask.distributed import Client
+    client = Client()
 
-    pruned = pd.read_pickle(urlfile).iloc[:5, :]
-    dask.visualize(parse_articles(pruned), filename="parse_articles_graph.png")
-    dask.compute(parse_articles(pruned))
-    # print(pruned)
+    date_string = urlfile.split('_')[0].split('/')[-1]
+    print(f"\n\nParsing {date_string} articles...")
+
+    pruned = pd.read_pickle(urlfile)
+    pruned = pruned.explode('article_links').reset_index(drop=True).head(200)
+    pruned['parsed_article'] = [{}]*len(pruned)
+
+    ddf = dd.from_pandas(pruned, npartitions=100)
+    parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
+    parsed.visualize(filename="parse_articles_graph.svg")
+    parsed = parsed.compute()
+
+    filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
+
+    if not os.path.exists(f"{cwd()}/parsed"):
+        os.mkdir(f"{cwd()}/parsed")
+
+    write_parsed(parsed, filename)
+    client.shutdown()
+
 
 if __name__ == "__main__":
-    urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls.pkl"))
-    launch_dash(urlfiles[0])
+    urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls_pruned.pkl"))
+    _ = [launch_dash(urlfile) for urlfile in urlfiles]
+    
 
 
     

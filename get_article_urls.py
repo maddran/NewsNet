@@ -19,6 +19,9 @@ from collections import Counter
 def cwd():
     return os.path.dirname(os.path.abspath(sys.argv[0]))
 
+def tmp():
+    return os.environ.get('TMP')
+
 def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
     total = int(resp.headers.get('content-length', 0))
@@ -34,17 +37,11 @@ def download(url: str, fname: str):
             bar.update(size)
 
 @dask.delayed
-def get_GDELT_data(date_string):
-
-    # if not os.path.exists(f"{cwd()}/data"):
-    try:
-        os.mkdir(f"{cwd()}/data")
-    except:
-        pass
+def get_GDELT_data(tmpdir, date_string):
 
     url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
 
-    filename = f"{cwd()}/data/{url.split('/')[-1]}"
+    filename = f"{tmpdir}/{url.split('/')[-1]}"
 
     download(url, filename)
 
@@ -181,12 +178,14 @@ def dropDups(row, threshold = 2):
     to_prune = row['article_links']
 
     counts = Counter(combined_links)
-    row['article_links'] = [k for k,v in counts.items() if (k in to_prune and v <= threshold)]
+    # print(counts.most_common(10))
+    row['article_links'] = [k for k,v in counts.items() if (k in to_prune and v < threshold)]
 
     return row
 
 def pruneLinks(urlfiles):
     to_prune = pd.read_pickle(urlfiles[-1]).set_index("index")
+    num_links = sum(to_prune["article_links"].apply(len))
 
     for urlfile in urlfiles[:-1]:
         df = pd.read_pickle(urlfile)
@@ -200,28 +199,45 @@ def pruneLinks(urlfiles):
     pruned = to_prune.apply(dropDups, axis = 1)
     pruned.drop('combined_links', axis=1, inplace = True)
 
+    pruned["num_links"] = pruned["article_links"].apply(len)
+    pruned = pruned[pruned.num_links > 0]
+
     pruned_path = f"{urlfiles[-1].split('.')[0]}_pruned.pkl"
     pruned.to_pickle(pruned_path)
-    print(f"\n\nSaving pruned URLs to {pruned_path}...")
+
+    num_links_pruned = sum(pruned["num_links"])
+    print(f"\n\nPruned {round((num_links - num_links_pruned)/num_links, 2)*100} % of URLs ({num_links_pruned} total URLs left).")
+    print(f"Saving pruned URLs to {pruned_path}...")
 
     return pruned
 
 
 def get_urls(dates, target_sources_path=None):
     res = []
-    for date in dates:
+    wrkdir = os.path.dirname(cwd())
 
+    if tmp():
+        tmpdir = tmp()
+    else:
+        tmpdir = wrkdir
+
+    try:
+        os.mkdir(f"{wrkdir}/data")
+    except:
+        pass
+
+    for date in dates:
         date_string = date.strftime("%Y%m%d%H%M%S")
 
-        db_path = f"{cwd()}/data/{date_string}.db"
+        db_path = f"{tmpdir}/{date_string}.db"
         if os.path.exists(db_path):
             db_file = f"sqlite:///{db_path}"
             print(f"\n\tDB file {db_file} exists! Continuing...")
         else:
-            filename = get_GDELT_data(date_string)
+            filename = get_GDELT_data(tmpdir, date_string)
             db_file = populate_sql(filename)
 
-        urls_path = f"{cwd()}/data/{date_string}_urls.pkl"
+        urls_path = f"{wrkdir}/data/{date_string}_urls.pkl"
         if os.path.exists(db_path):
             print(f"\n\tURL file {date_string}_urls.pkl exists! Continuing...")
         else:
@@ -240,7 +256,7 @@ def main(args):
     num_days = args.num_days
     dates = [start_date + timedelta(i) for i in range(-2, num_days)]
 
-    dask.visualize(get_urls(dates), filename='get_article_graph.svg')
+    # dask.visualize(get_urls(dates), filename='get_article_graph.svg')
     urlfiles = sorted(dask.compute(get_urls(dates))[0])
 
     rng = list(range(len(urlfiles)))[2:]
