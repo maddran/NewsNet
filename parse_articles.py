@@ -1,20 +1,201 @@
+from newspaper import Article
+import os, sys
+from urllib.parse import urljoin
+import tldextract
+from dateparser import parse as dateparse
+from googletrans import Translator
+from bs4 import BeautifulSoup
+from tqdm import tqdm
+import dask
+import dask.dataframe as dd
 from collections import Counter
 import glob
 import pandas as pd
 from datetime import datetime
-import os, sys
+import pickle
 
 # import seaborn as sns
 # import matplotlib.pyplot as plt
 
+
 def cwd():
     return os.path.dirname(os.path.abspath(sys.argv[0]))
 
-def dropDups(links, threshold):
-    counts = Counter(links)
-    res = [k for k,v in counts.items() if v < threshold]
-    return res
+
+def parse_html(article):
+    soup = BeautifulSoup(article['html'], features="lxml")
+
+    if article["date"] == None:
+        parsed_date = parse_date(soup)
+        if parsed_date:
+            parsed_date = dateparse(parsed_date)
+
+        article["parsed_date"] = parsed_date
+    else:
+        article["parsed_date"] = article['date']
+
+    article['raw_links'] = get_links(soup)
+    article = process_links(article)
+
+    return article
+
+
+def parse_date(soup):
+    date = None
+
+    tag_matches = ['meta[itemprop*=date]', 'time',
+                    'h1[class*=date]', 'h2[class*=date]',
+                    'h3[class*=date]', 'p[class*=date]',
+                    'div[class*=date]']
+
+    for match in tag_matches:
+        date_tag = soup.select_one(match)
+        if date_tag:
+            date = parse_date_tag(date_tag)
+        if date:
+            break
+
+    return date
+
+
+def parse_date_tag(tag):
+    try:
+      date = tag['datetime']
+      if (not date or date.isspace()):
+        raise
+    except:
+      try:
+        date = tag['content']
+        if (not date or date.isspace()):
+          raise
+      except:
+        date = tag.get_text()
+
+    if (not date or date.isspace()):
+      return None
+    else:
+      # print(f"\n\nFOUND TIME TAG: {date}")
+      return date
+
+
+def get_links(soup):
+    links = soup.find_all('a', href=True)
+    links = [l['href'] for l in links]
+    return links
+
+
+def extract_domain(url):
+    try:
+        extract = tldextract.extract(url)
+        return '.'.join(extract)
+    except:
+        return
+
+
+def process_links(article):
+    raw_links = article["raw_links"]
+    url = article["url"]
+    tld = extract_domain(url)
+
+    links = [urljoin(url, rl) for rl in raw_links]
+    links = list(set([extract_domain(l) for l in links]))
+    internal = [l for l in links if l == tld]
+    external = [l for l in links if l != tld]
+
+    article['links'] = links
+    article['internal_links'] = internal
+    article['external_links'] = external
+
+    return article
+
+@dask.delayed
+def get_article(url, lang):
+    article = Article(url, keep_article_html=True)
+    try:
+        article.download()
+        article.parse()
+    except:
+        return
+
+    if article.text == None:
+        return
+
+    parsed_article = {}
+    parsed_article['url'] = article.url
+    parsed_article['title'] = article.title
+    parsed_article['date'] = article.publish_date
+    parsed_article['html'] = article.html
+    parsed_article['text'] = article.text
+
+    parsed_article = parse_html(parsed_article)
+    parsed_article = translate(parsed_article, lang)
+    
+
+    return parsed_article
+
+def translate(article, lang):
+
+    if lang == "en":
+        article['translated_title'] = article["title"]
+        return article
+
+    translator = Translator()
+
+    try:
+        article['translated_title'] = translator.translate(
+            article["title"], src=lang).text
+        # print("\n\nTRANSLATED!\n\n")
+    except:
+        article['translated_title'] = "ERROR"
+
+    return article
+
+
+def parse_articles(pruned):
+    parsed = []
+    for i, row in pruned.iterrows():
+        urls = row["article_links"]
+        name = row["name"]
+        lang = row["lang_short"]
+        tld = row["top_level_domain"]
+
+        parsed_articles = [get_article(url, lang) for url in tqdm(urls, position=0, desc=str(name))]
+
+        if parsed_articles and len(parsed_articles) > 0:
+            res = parsed_articles #pd.DataFrame(parsed_articles)
+
+            try:
+                if not os.path.exists("parsed"):
+                    os.mkdir("parsed")
+
+                filename = f"parsed/{row.name}.pkl"
+                # res.to_pickle(filename)
+                # with open(filename, 'wb') as handle:
+                #     pickle.dump(res, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                print(f"\n\nSaved {name} articles to {filename}\n")
+                parsed.append(res)
+            except Exception as e:
+                print(e)
+                print(f"\n\nFailed to parse {name}. Continuing...\n")
+
+    return parsed
+
+
+
+def launch_dash(urlfile):
+    # from dask.distributed import Client
+    # client = Client()
+
+    pruned = pd.read_pickle(urlfile).iloc[:5, :]
+    dask.visualize(parse_articles(pruned), filename="parse_articles_graph.png")
+    dask.compute(parse_articles(pruned))
+    # print(pruned)
 
 if __name__ == "__main__":
     urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls.pkl"))
-    print(urlfiles)
+    launch_dash(urlfiles[0])
+
+
+    
+        
+

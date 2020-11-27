@@ -9,13 +9,11 @@ import shutil
 import os
 import sys
 import argparse
-
 from tqdm import tqdm
-tqdm.pandas()
-
 from fuzzywuzzy import process, fuzz
 import tldextract
 import dask
+from collections import Counter
 
 
 def cwd():
@@ -50,7 +48,7 @@ def get_GDELT_data(date_string):
 
     download(url, filename)
 
-    print(f"Saved {filename}...")
+    print(f"\n\nSaved {filename}...")
         
     fileout = filename.split(".")[0] + ".txt"
 
@@ -60,20 +58,17 @@ def get_GDELT_data(date_string):
 
     os.remove(filename)
 
-    print(f"\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
+    print(f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
 
     return fileout
 
 @dask.delayed
 def populate_sql(file):
-    print(f"\nCreating SQLite DB from {file}...")
+    print(f"\n\nCreating SQLite DB from {file}...")
 
     j = 1
     chunksize = int(1e6)
     db_file = f"{file.split('.')[0]}.db"
-
-    if os.path.exists(db_file):
-        os.remove(db_file)
 
     db_path = f"sqlite:///{db_file}"
     urls_database = create_engine(db_path)
@@ -91,7 +86,7 @@ def populate_sql(file):
 
     os.remove(file)
 
-    print(f"DB file {db_file} saved")
+    print(f"\n\nDB file {db_file} saved")
     return db_path
 
 def extract_domain(url):
@@ -128,10 +123,10 @@ def match_urls(db_file, target_sources_path):
 
     urls_database = create_engine(db_file)
 
-    print("\nGetting target sources...")
+    print(f"\n\nGetting target sources from {target_sources_path}...")
     target_sources = get_target_sources(target_sources_path)
 
-    print("\nMatching target and GDELT URLs...")
+    print("\n\nMatching target and GDELT URLs...")
     query = """SELECT DISTINCT FrontPageURL FROM urls_table"""
     unique_frontPage_urls = pd.read_sql_query(query, urls_database)
     unique_frontPage_urls['top_level_domain'] = [extract_domain(url) for url in unique_frontPage_urls.FrontPageURL]
@@ -168,7 +163,7 @@ def get_article_links(source, urls_database):
 
 @dask.delayed
 def collect_urls(matched, db_file):
-    print("\nCollecting article URLs...")
+    print("\n\nCollecting article URLs...")
     urls_database = create_engine(db_file)
     res = matched.copy()
     res['article_links'] = res.apply(lambda x: get_article_links(x, urls_database), axis=1)
@@ -176,28 +171,59 @@ def collect_urls(matched, db_file):
 
 @dask.delayed
 def save_urls(urls, urls_path):
-    print(f"\nSaving URLs to {urls_path}...")
+    print(f"\n\nSaving URLs to {urls_path}...")
     urls.to_pickle(urls_path)
     return urls_path
 
+def dropDups(row, threshold = 2):
 
-def get_urls (dates, target_sources_path = None):
+    combined_links = row['combined_links']
+    to_prune = row['article_links']
+
+    counts = Counter(combined_links)
+    row['article_links'] = [k for k,v in counts.items() if (k in to_prune and v <= threshold)]
+
+    return row
+
+def pruneLinks(urlfiles):
+    to_prune = pd.read_pickle(urlfiles[-1]).set_index("index")
+
+    for urlfile in urlfiles[:-1]:
+        df = pd.read_pickle(urlfile)
+        df.set_index("index", inplace = True)
+
+        temp = to_prune.join(df['article_links'], lsuffix='', rsuffix='_new')
+        temp = temp.applymap(lambda d: d if isinstance(d, list) else [])
+
+        to_prune['combined_links'] = temp['article_links']+temp['article_links_new']
+    
+    pruned = to_prune.apply(dropDups, axis = 1)
+    pruned.drop('combined_links', axis=1, inplace = True)
+
+    pruned_path = f"{urlfiles[-1].split('.')[0]}_pruned.pkl"
+    pruned.to_pickle(pruned_path)
+    print(f"\n\nSaving pruned URLs to {pruned_path}...")
+
+    return pruned
+
+
+def get_urls(dates, target_sources_path=None):
     res = []
     for date in dates:
-        
+
         date_string = date.strftime("%Y%m%d%H%M%S")
 
         db_path = f"{cwd()}/data/{date_string}.db"
         if os.path.exists(db_path):
             db_file = f"sqlite:///{db_path}"
-            print(f"\tDB file {db_file} exists! Continuing...")
+            print(f"\n\tDB file {db_file} exists! Continuing...")
         else:
             filename = get_GDELT_data(date_string)
             db_file = populate_sql(filename)
-            
+
         urls_path = f"{cwd()}/data/{date_string}_urls.pkl"
-        if os.path.exists(db_path): 
-            print(f"\tURL file {date_string}_urls.pkl exists! Continuing...")
+        if os.path.exists(db_path):
+            print(f"\n\tURL file {date_string}_urls.pkl exists! Continuing...")
         else:
             matched = match_urls(db_file, target_sources_path)
             urls = collect_urls(matched, db_file)
@@ -206,6 +232,22 @@ def get_urls (dates, target_sources_path = None):
         res.append(urls_path)
 
     return res
+
+
+def main(args):
+    start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
+    start_date = start_date.replace(hour=args.time_of_day)
+    num_days = args.num_days
+    dates = [start_date + timedelta(i) for i in range(-2, num_days)]
+
+    dask.visualize(get_urls(dates), filename='get_article_graph.svg')
+    urlfiles = sorted(dask.compute(get_urls(dates))[0])
+
+    rng = list(range(len(urlfiles)))[2:]
+    _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
+
+    print("\n\nDone!\n\n")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -217,13 +259,7 @@ if __name__ == "__main__":
                         help="time of day to collect links (only whole hours in 24h format)")
     args = parser.parse_args()
 
-    start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
-    start_date = start_date.replace(hour = args.time_of_day)
-    num_days = args.num_days
-    dates = [start_date + timedelta(i) for i in range(-2, num_days)]
-    # print(dates)
+    main(args)
 
-    # dask.visualize(get_urls(dates), filename='graph.svg')
-    out = dask.compute(get_urls(dates))
-    # print(out)
+   
     
