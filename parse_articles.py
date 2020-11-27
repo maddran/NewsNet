@@ -191,7 +191,7 @@ def launch_dash(urlfile):
 
     ddf = dd.from_pandas(pruned, npartitions=100)
     parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
-    parsed.visualize(filename="parse_articles_graph.svg")
+    # parsed.visualize(filename="parse_articles_graph.svg")
     parsed = parsed.compute()
 
     filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
@@ -205,6 +205,7 @@ def launch_dash(urlfile):
 
 if __name__ == "__main__":
     urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls_pruned.pkl"))
+    print(urlfiles)
     _ = [launch_dash(urlfile) for urlfile in urlfiles]
     
 
