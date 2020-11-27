@@ -3,5 +3,6 @@ data/*
 .vscode/*
 env/*
 *.png
+*.svg
 dask*/
 parsed/*
