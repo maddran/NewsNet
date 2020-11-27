@@ -205,7 +205,7 @@ def launch_dash(urlfile):
 
 if __name__ == "__main__":
     urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls_pruned.pkl"))
-    print(urlfiles)
+    print(cwd())
     _ = [launch_dash(urlfile) for urlfile in urlfiles]
     
 
