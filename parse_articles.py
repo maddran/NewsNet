@@ -182,7 +182,7 @@ def launch_dash(urlfile):
     from dask.distributed import Client
     client = Client()
 
-    date_string = urlfile.split('_')[0].split('/')[-1]
+    date_string = urlfile.split('/')[-1].split('_')[0]
     print(f"\n\nParsing {date_string} articles...")
 
     pruned = pd.read_pickle(urlfile)
