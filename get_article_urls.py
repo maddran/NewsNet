@@ -218,7 +218,8 @@ def get_urls(dates, target_sources_path=None):
     if tmp():
         tmpdir = tmp()
     else:
-        tmpdir = wrkdir
+        os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
+        tmpdir = f"{wrkdir}/tmp"
 
     try:
         os.mkdir(f"{wrkdir}/data")
@@ -250,8 +251,6 @@ def get_urls(dates, target_sources_path=None):
 
 
 def main(args):
-    from dask.distributed import Client
-    client = Client()
 
     start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
     start_date = start_date.replace(hour=args.time_of_day)
