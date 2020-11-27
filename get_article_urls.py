@@ -252,18 +252,24 @@ def get_urls(dates, target_sources_path=None):
 
 def main(args):
 
+    if args.distribute:
+        from dask.distributed import Client
+        client = Client()
+
     start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
     start_date = start_date.replace(hour=args.time_of_day)
     num_days = args.num_days
     dates = [start_date + timedelta(i) for i in range(-2, num_days)]
 
-    # dask.visualize(get_urls(dates), filename='get_article_graph.svg')
     urlfiles = get_urls(dates)
-    dask.compute(*urlfiles)
-    urlfiles = sorted(urlfiles)
+    if args.visualize:
+        dask.visualize(*urlfiles, filename='get_article_graph.svg')
+    else:
+        urlfiles = dask.compute(*urlfiles)
+        urlfiles = sorted(urlfiles)
 
-    rng = list(range(len(urlfiles)))[2:]
-    _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
+        rng = list(range(len(urlfiles)))[2:]
+        _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
 
     print("\n\nDone!\n\n")
 
@@ -276,6 +282,10 @@ if __name__ == "__main__":
                         help="num days from start date to collect")
     parser.add_argument("--time_of_day", required=False, type=int, default = 9,
                         help="time of day to collect links (only whole hours in 24h format)")
+    parser.add_argument("--distribute", action = 'store_true',
+                        help="starts local cluster")
+    parser.add_argument("--visualize", action='store_true',
+                        help="skips computation and outputs graph (requires graphviz installed)")
     args = parser.parse_args()
 
     main(args)
