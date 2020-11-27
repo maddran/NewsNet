@@ -253,6 +253,7 @@ def get_urls(dates, target_sources_path=None):
 
 def main(args):
 
+    client = None
     if args.distribute:
         client = Client()
 
@@ -271,6 +272,8 @@ def main(args):
         rng = list(range(len(urlfiles)))[2:]
         _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
 
+    if client:
+        client.shutdown()
 
     print("\n\nDone!\n\n")
 
