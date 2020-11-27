@@ -257,13 +257,13 @@ def main(args):
     num_days = args.num_days
     dates = [start_date + timedelta(i) for i in range(-2, num_days)]
 
-    dask.visualize(get_urls(dates), filename='get_article_graph.svg')
+    # dask.visualize(get_urls(dates), filename='get_article_graph.svg')
     urlfiles = get_urls(dates)
     dask.compute(*urlfiles)
     urlfiles = sorted(urlfiles)
 
-    # rng = list(range(len(urlfiles)))[2:]
-    # _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
+    rng = list(range(len(urlfiles)))[2:]
+    _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
 
     print("\n\nDone!\n\n")
 
