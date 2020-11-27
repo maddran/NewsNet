@@ -6,13 +6,13 @@ import requests
 from datetime import datetime, timedelta
 import gzip
 import shutil
-import os
-import sys
+import os, sys, glob
 import argparse
 from tqdm import tqdm
 from fuzzywuzzy import process, fuzz
 import tldextract
 import dask
+from dask.distributed import Client
 from collections import Counter
 
 
@@ -26,6 +26,7 @@ def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
     total = int(resp.headers.get('content-length', 0))
     with open(fname, 'wb') as file, tqdm(desc=f"Downloading {fname.split('/')[-1]}",
+                                            position=0,
                                             total=total,
                                             unit='iB',
                                             unit_scale=True,
@@ -253,7 +254,6 @@ def get_urls(dates, target_sources_path=None):
 def main(args):
 
     if args.distribute:
-        from dask.distributed import Client
         client = Client()
 
     start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
@@ -261,15 +261,16 @@ def main(args):
     num_days = args.num_days
     dates = [start_date + timedelta(i) for i in range(-2, num_days)]
 
-    urlfiles = get_urls(dates)
+    res = get_urls(dates)
     if args.visualize:
-        dask.visualize(*urlfiles, filename='get_article_graph.svg')
+        dask.visualize(*res, filename='get_article_graph.svg')
     else:
-        urlfiles = dask.compute(*urlfiles)
+        urlfiles = dask.compute(*res)
         urlfiles = sorted(urlfiles)
 
         rng = list(range(len(urlfiles)))[2:]
         _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
+
 
     print("\n\nDone!\n\n")
 
