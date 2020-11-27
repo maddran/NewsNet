@@ -20,7 +20,7 @@ def cwd():
     return os.path.dirname(os.path.abspath(sys.argv[0]))
 
 def tmp():
-    return os.environ.get('TMP')
+    return os.environ.get('TMPDIR')
 
 def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
