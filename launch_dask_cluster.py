@@ -1,6 +1,6 @@
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster
-from get_article_urls import urls_main
+from get_article_urls import main as urls_main
 import os
 
 def main(args):
@@ -16,7 +16,7 @@ def main(args):
         project= args.project)
 
     client = Client(cluster)
-    cluster.adapt(minimum_jobs = 40, maximum_memory = "300GB")
+    cluster.adapt(minimum_jobs = 20, maximum_memory = "300GB")
 
     urls_main(args)
 
