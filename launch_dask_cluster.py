@@ -9,8 +9,8 @@ def main(args):
     cluster = SLURMCluster(
         processes=20,
         memory="100GB",
-        queue="test",
-        walltime="15",
+        queue="short",
+        walltime="1:00:00",
         local_directory='/tmp',
         project= args.project)
 
