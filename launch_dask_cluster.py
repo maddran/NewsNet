@@ -1,7 +1,9 @@
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster
-from get_article_urls import main as urls_main
+import argparse
 import os
+
+from get_article_urls import main as urls_main
 
 def main(args):
     cluster = SLURMCluster(
