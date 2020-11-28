@@ -12,8 +12,9 @@ def main(args):
         memory="100GB",
         queue="small",
         walltime="1:00:00",
-        local_directory='/tmp',
-        project= args.project)
+        local_directory = '/tmp',
+        log_directory = f'{os.environ.get(PWD)}/dask-worker-space',
+        project = args.project)
 
     with Client(cluster) as client:
         cluster.adapt(maximum_memory="300GB")
