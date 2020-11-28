@@ -13,7 +13,7 @@ def main(args):
         queue="small",
         walltime="1:00:00",
         local_directory = '/tmp',
-        log_directory = f'{os.environ.get('PWD')}/dask-worker-space',
+        log_directory = f"{os.environ.get('PWD')}/dask-worker-space",
         project = args.project)
 
     with Client(cluster) as client:
