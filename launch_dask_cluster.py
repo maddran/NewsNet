@@ -6,19 +6,26 @@ import os
 from get_article_urls import main as urls_main
 
 def main(args):
-    cluster = SLURMCluster(
-        cores = 20,
-        processes=20,
-        memory="100GB",
-        queue="small",
-        walltime="1:00:00",
-        local_directory = '/tmp',
-        log_directory = f"{os.environ.get('PWD')}/dask-worker-space",
-        project = args.project)
+    if args.distribute:
+        cluster = SLURMCluster(
+            cores = 20,
+            processes=20,
+            memory="100GB",
+            queue="small",
+            walltime="1:00:00",
+            local_directory = '/tmp',
+            log_directory = f"{os.environ.get('PWD')}/dask-worker-space",
+            project = args.project)
 
-    with Client(cluster) as client:
-        cluster.adapt(maximum_memory="300GB")
-        urls_main(args)
+        with Client(cluster) as client:
+            cluster.adapt(maximum_memory="300GB")
+            urls_main(args)
+    else:
+        with Client() as client:
+            urls_main(args)
+
+
+    
 
 
 if __name__ == "__main__":
