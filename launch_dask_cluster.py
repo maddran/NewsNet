@@ -14,10 +14,8 @@ def main(args):
         local_directory='/tmp',
         project= args.project)
 
-    client = Client(cluster)
-    cluster.adapt(maximum_memory = "300GB")
-
-    with client:
+    with Client(cluster) as client:
+        cluster.adapt(maximum_memory="300GB")
         urls_main(args)
 
 
