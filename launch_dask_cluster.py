@@ -7,6 +7,7 @@ from get_article_urls import main as urls_main
 
 def main(args):
     cluster = SLURMCluster(
+        cores = 20,
         processes=20,
         memory="100GB",
         queue="short",
