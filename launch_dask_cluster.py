@@ -13,12 +13,11 @@ def main(args):
         queue="large",
         walltime="02:00:00",
         local_directory='/tmp',
-        python="module load python-data",
         interface="ib0",
         project= args.project)
 
     client = Client(cluster)
-    cluster.adapt(minimum_jobs = 20, maximum_memory = "300GB")
+    cluster.adapt(minimum_jobs = 2, maximum_memory = "300GB")
 
     urls_main(args)
 
