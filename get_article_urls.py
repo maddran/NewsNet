@@ -253,10 +253,6 @@ def get_urls(dates, target_sources_path=None):
 
 def main(args):
 
-    client = None
-    if args.distribute:
-        client = Client()
-
     start_date = datetime.strptime(str(args.start_date), "%Y%m%d")
     start_date = start_date.replace(hour=args.time_of_day)
     num_days = args.num_days
@@ -271,9 +267,6 @@ def main(args):
 
         rng = list(range(len(urlfiles)))[2:]
         _ = [pruneLinks(urlfiles[i-2:i+1]) for i in rng]
-
-    if client:
-        client.shutdown()
 
     print("\n\nDone!\n\n")
 

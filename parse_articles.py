@@ -14,12 +14,9 @@ import pandas as pd
 from datetime import datetime
 import pickle
 
-# import seaborn as sns
-# import matplotlib.pyplot as plt
-
 
 def cwd():
-    return os.path.dirname(os.path.abspath(sys.argv[0]))
+    return os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
 
 
 # @dask.delayed
@@ -204,7 +201,7 @@ def launch_dash(urlfile):
 
 
 if __name__ == "__main__":
-    urlfiles = sorted(glob.glob(f"{os.path.dirname(cwd())}/data/*urls_pruned.pkl"))
+    urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls_pruned.pkl"))
     _ = [launch_dash(urlfile) for urlfile in urlfiles]
     
 
