@@ -9,17 +9,18 @@ def main(args):
     cluster = SLURMCluster(
         cores=40,
         processes=20,
-        memory="10GB",
-        queue="large",
-        walltime="02:00:00",
+        memory="100GB",
+        queue="test",
+        walltime="15",
         local_directory='/tmp',
         interface="ib0",
         project= args.project)
 
     client = Client(cluster)
-    cluster.adapt(minimum_jobs = 2, maximum_memory = "300GB")
+    cluster.adapt(maximum_memory = "300GB")
 
-    urls_main(args)
+    with client:
+        urls_main(args)
 
 
 if __name__ == "__main__":
