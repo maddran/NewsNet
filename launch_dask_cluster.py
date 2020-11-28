@@ -10,7 +10,7 @@ def main(args):
         cores = 20,
         processes=20,
         memory="100GB",
-        queue="short",
+        queue="small",
         walltime="1:00:00",
         local_directory='/tmp',
         project= args.project)
