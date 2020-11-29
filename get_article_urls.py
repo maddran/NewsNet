@@ -223,11 +223,11 @@ def get_urls(dates, target_sources_path=None):
     res = []
     wrkdir = os.path.dirname(cwd())
 
-    # if tmp():
-    #     tmpdir = tmp()
-    # else:
-    os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
-    tmpdir = f"{wrkdir}/tmp"
+    if tmp():
+        tmpdir = tmp()
+    else:
+        os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
+        tmpdir = f"{wrkdir}/tmp"
 
     try:
         os.mkdir(f"{wrkdir}/data")
