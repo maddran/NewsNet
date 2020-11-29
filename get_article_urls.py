@@ -91,7 +91,7 @@ def populate_sql(file, date_string):
 
     os.remove(file)
     final_db_path = f"sqlite:///{file.split('.')[0]}.db"
-    os.replace(tmp_db_path.split('sqlite:///')[-1], 
+    shutil.move(tmp_db_path.split('sqlite:///')[-1], 
                 final_db_path.split('sqlite:///')[-1])
 
     sprint(f"\n\nDB file {final_db_file} saved")
