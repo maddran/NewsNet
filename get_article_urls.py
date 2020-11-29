@@ -108,7 +108,7 @@ def get_target_sources(filepath = None):
     if filepath == None:
         filepath = f'{cwd()}/sources_emm.csv'
 
-    sprint(f"\n\nGetting target sources from {target_sources_path}...\n")
+    sprint(f"\n\nGetting target sources from {filepath}...\n")
 
     target_sources = pd.read_csv(filepath, delimiter='\t', keep_default_na=False)
     target_sources["top_level_domain"] = [extract_domain(url) for url in target_sources.url]
