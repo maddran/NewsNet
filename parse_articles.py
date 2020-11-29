@@ -16,9 +16,11 @@ from datetime import datetime
 import pickle
 
 
+def sprint(string):
+    sys.stdout.write(string)
+
 def cwd():
     return os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
-
 
 # @dask.delayed
 def parse_html(article):
