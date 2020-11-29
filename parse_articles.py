@@ -1,5 +1,6 @@
-from newspaper import Article
 import os, sys
+import argparse
+from newspaper import Article
 from urllib.parse import urljoin
 import tldextract
 from dateparser import parse as dateparse
@@ -90,6 +91,11 @@ def extract_domain(url):
     except:
         return
 
+def try_urljoin(url, rl):
+    try:
+        return urljoin(url, rl)
+    except:
+        return
 
 # @dask.delayed
 def process_links(article):
@@ -97,7 +103,7 @@ def process_links(article):
     url = article["url"]
     tld = extract_domain(url)
 
-    links = [urljoin(url, rl) for rl in raw_links]
+    links = [try_urljoin(url, rl) for rl in raw_links]
     links = list(set([extract_domain(l) for l in links]))
     internal = [l for l in links if l == tld]
     external = [l for l in links if l != tld]
@@ -174,36 +180,50 @@ def parse_article(row):
 
     return row
 
+def launch_dask(urlfile):
 
-def launch_dash(urlfile):
-    from dask.distributed import Client
-    client = Client()
+    date_string = urlfile.split('/')[-1].split('_')[0]
+    print(f"\n\nParsing {date_string} articles...")
 
-    with Client() as client:
+    pruned = pd.read_pickle(urlfile)
+    pruned = pruned.explode('article_links').reset_index(drop=False).groupby('index').head(10)
+    pruned['parsed_article'] = [{}]*len(pruned)
+    ddf = dd.from_pandas(pruned, npartitions=100)
+    parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
+
+    return parsed
+  
+        
+def main(args):
+    urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls_pruned.pkl"))
+    if not urlfiles:
+        urlfiles = sorted(glob.glob(f"data/*urls_pruned.pkl"))
+    
+    if not os.path.exists(f"{cwd()}/parsed"):
+        os.mkdir(f"{cwd()}/parsed")
+    
+    for i, urlfile in enumerate(urlfiles):
+        parsed = launch_dask(urlfile)
         date_string = urlfile.split('/')[-1].split('_')[0]
-        print(f"\n\nParsing {date_string} articles...")
-
-        pruned = pd.read_pickle(urlfile)
-        pruned = pruned.explode('article_links').reset_index(drop=True).head(10000)
-        pruned['parsed_article'] = [{}]*len(pruned)
-
-        ddf = dd.from_pandas(pruned, npartitions=100)
-        parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
-        # parsed.visualize(filename="parse_articles_graph.svg")
-        parsed = parsed.compute()
-
         filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
 
-        if not os.path.exists(f"{cwd()}/parsed"):
-            os.mkdir(f"{cwd()}/parsed")
-
-        write_parsed(parsed, filename)
-        client.shutdown()
-
+        if args.visualize:
+            parsed.visualize(
+                filename=f"parse_articles_graph_{date_string}.svg")
+        else:
+            parsed = parsed.compute()
+            write_parsed(parsed, filename)
+        
 
 if __name__ == "__main__":
-    urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls_pruned.pkl"))
-    _ = [launch_dash(urlfile) for urlfile in urlfiles]
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--visualize", action='store_true', required=False,
+                        help="skips computation and outputs graph (requires graphviz installed)")
+    args = parser.parse_args()
+    main(args)
+
+    
     
 
 

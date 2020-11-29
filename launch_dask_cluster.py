@@ -3,7 +3,7 @@ from dask_jobqueue import SLURMCluster
 import argparse
 import os
 
-from get_article_urls import main as urls_main
+from parse_article import main as parse_main
 
 def main(args):
     if args.distribute:
