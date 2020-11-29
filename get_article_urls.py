@@ -24,29 +24,30 @@ def tmp():
 
 def download(url: str, fname: str):
     resp = requests.get(url, stream=True)
-    with open(fname, 'wb') as file:
-        for data in resp.iter_content(chunk_size=1024):
-            file.write(data)
-
-
-    # total = int(resp.headers.get('content-length', 0))
-    # with open(fname, 'wb') as file, tqdm(desc=f"Downloading {fname.split('/')[-1]}",
-    #                                         position=0,
-    #                                         total=total,
-    #                                         unit='iB',
-    #                                         unit_scale=True,
-    #                                         unit_divisor=1024,
-    #                                     ) as bar:
+    # with open(fname, 'wb') as file:
     #     for data in resp.iter_content(chunk_size=1024):
-    #         size = file.write(data)
-    #         bar.update(size)
+    #         file.write(data)
+
+
+    total = int(resp.headers.get('content-length', 0))
+    with open(fname, 'wb') as file, tqdm(desc=f"Downloading {fname.split('/')[-1]}",
+                                            position=0,
+                                            total=total,
+                                            unit='iB',
+                                            unit_scale=True,
+                                            unit_divisor=1024,
+                                        ) as bar:
+        for data in resp.iter_content(chunk_size=1024):
+            size = file.write(data)
+            bar.update(size)
 
 @dask.delayed
 def get_GDELT_data(tmpdir, date_string):
 
     url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
 
-    filename = f"{tmpdir}/{url.split('/')[-1]}"
+    # filename = f"{tmpdir}/{url.split('/')[-1]}"
+    filename = f"{cwd()}/{url.split('/')[-1]}"
 
     download(url, filename)
 
