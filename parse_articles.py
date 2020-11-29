@@ -27,7 +27,10 @@ def parse_html(article):
     if article["date"] == None:
         parsed_date = parse_date(soup)
         if parsed_date:
-            parsed_date = dateparse(parsed_date)
+            try:
+                parsed_date = dateparse(parsed_date)
+            except:
+                parsed_date = None
 
         article["parsed_date"] = parsed_date
     else:
