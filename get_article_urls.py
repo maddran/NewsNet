@@ -249,9 +249,10 @@ def get_urls(dates, target_sources_path=None):
             else:
                 filename = get_GDELT_data(tmpdir, date_string)
                 db_file = populate_sql(filename, date_string)
-                matched = match_urls(db_file, target_sources_path, date_string)
-                urls = collect_urls(matched, db_file, date_string)
-                urls_path = save_urls(urls, urls_path)
+                
+            matched = match_urls(db_file, target_sources_path, date_string)
+            urls = collect_urls(matched, db_file, date_string)
+            urls_path = save_urls(urls, urls_path)
 
         res.append(urls_path)
 
