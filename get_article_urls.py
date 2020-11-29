@@ -15,6 +15,8 @@ import dask
 from dask.distributed import Client
 from collections import Counter
 
+def sprint(string):
+    sys.stdout.write(string)
 
 def cwd():
     return os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -51,9 +53,7 @@ def get_GDELT_data(tmpdir, date_string):
 
     download(url, filename)
 
-    sys.stdout.write(f"\n\nSaved {filename}...")
-
-    print(f"\n\nSaved {filename}...")
+    sprint(f"\n\nSaved {filename}...")
         
     fileout = filename.split(".")[0] + ".txt"
 
@@ -63,7 +63,7 @@ def get_GDELT_data(tmpdir, date_string):
 
     os.remove(filename)
 
-    print(f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
+    sprint(f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
 
     return fileout
 
