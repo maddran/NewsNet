@@ -82,11 +82,11 @@ def populate_sql(file, date_string):
                     desc=f"Populating {db_path.split('/')[-1]}", total = 10):
         df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
         df.index += j
-        df.to_sql(f"{date_string}_urls_table", urls_database, if_exists='append')
+        df.to_sql(f"urls_table", urls_database, if_exists='append')
         j = df.index[-1] + 1
 
 
-    urls_database.execute(f"CREATE INDEX urls_index ON {date_string}_urls_table(FrontPageURL)")
+    urls_database.execute(f"CREATE INDEX urls_index ON urls_table(FrontPageURL)")
 
     os.remove(file)
 
@@ -131,7 +131,7 @@ def match_urls(db_file, target_sources_path, date_string):
     target_sources = get_target_sources(target_sources_path)
 
     sprint("\n\nMatching target and GDELT URLs...\n")
-    query = f"""SELECT DISTINCT FrontPageURL FROM {date_string}_urls_table"""
+    query = f"""SELECT DISTINCT FrontPageURL FROM urls_table"""
     unique_frontPage_urls = pd.read_sql_query(query, urls_database)
     unique_frontPage_urls['top_level_domain'] = [extract_domain(url) for url in unique_frontPage_urls.FrontPageURL]
 
@@ -160,7 +160,7 @@ def match_urls(db_file, target_sources_path, date_string):
 def get_article_links(source, urls_database, date_string):
     gdelt_url = f'"{source.gdelt_url}"'
     tld = source.top_level_domain
-    query = f"""SELECT LinkURL FROM {date_string}_urls_table WHERE FrontPageURL = {gdelt_url}"""
+    query = f"""SELECT LinkURL FROM urls_table WHERE FrontPageURL = {gdelt_url}"""
     links = pd.read_sql_query(query, urls_database)
     links['top_level_domain'] = links['LinkURL'].map(extract_domain)
     return list(set(links[links.top_level_domain == tld].LinkURL))
