@@ -184,7 +184,7 @@ def launch_dash(urlfile):
         print(f"\n\nParsing {date_string} articles...")
 
         pruned = pd.read_pickle(urlfile)
-        pruned = pruned.explode('article_links').reset_index(drop=True).head(200)
+        pruned = pruned.explode('article_links').reset_index(drop=True).head(1000)
         pruned['parsed_article'] = [{}]*len(pruned)
 
         ddf = dd.from_pandas(pruned, npartitions=100)
