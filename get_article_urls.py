@@ -44,7 +44,7 @@ def download(url: str, fname: str):
             bar.update(size)
 
 @dask.delayed
-def get_GDELT_data(tmpdir, date_string):
+def get_GDELT_data(tmpdir, wrkdir, date_string):
 
     url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
 
@@ -64,12 +64,11 @@ def get_GDELT_data(tmpdir, date_string):
 
     sprint(f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
 
-    populate_sql(fileout, date_string)
+    db_path = populate_sql(fileout, wrkdir, date_string)
 
-    return fileout
+    return db_path
 
-@dask.delayed
-def populate_sql(file, date_string):
+def populate_sql(file, wrkdir, date_string):
     
     j = 1
     chunksize = int(1e6)
@@ -92,9 +91,9 @@ def populate_sql(file, date_string):
     urls_database.execute(f"CREATE INDEX urls_index ON urls_table(FrontPageURL)")
 
     os.remove(file)
-    final_db_path = f"sqlite:///{file.split('.')[0]}.db"
+    final_db_path = f"wrkdir/tmp/{date_string}.db"
     shutil.move(tmp_db_path.split('sqlite:///')[-1], 
-                final_db_path.split('sqlite:///')[-1])
+                final_db_path)
 
     sprint(f"\n\nDB file {final_db_path.split('/')[-1]} saved")
     return final_db_path
@@ -229,31 +228,27 @@ def pruneLinks(urlfiles):
 def get_urls(dates, target_sources_path=None):
     res = []
     wrkdir = os.path.dirname(cwd())
+    os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
+    os.makedirs(f"{wrkdir}/data", exist_ok=True)
 
     if tmp():
         tmpdir = tmp()
     else:
-        os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
         tmpdir = f"{wrkdir}/tmp"
-
-    try:
-        os.mkdir(f"{wrkdir}/data")
-    except:
-        pass
 
     for date in dates:
         date_string = date.strftime("%Y%m%d%H%M%S")
 
-        db_path = f"{tmpdir}/{date_string}.db"
+        db_path = f"{wrkdir}/tmp/{date_string}.db"
         urls_path = f"{wrkdir}/data/{date_string}_urls.pkl"
         if os.path.exists(urls_path):
             print(f"\n\tURL file {date_string}_urls.pkl exists! Continuing...")
         else:
             if os.path.exists(db_path):
                 db_file = f"sqlite:///{db_path}"
-                print(f"\n\tDB file {db_file} exists! Continuing...")
+                print(f"\n\tDB file {db_path} exists! Continuing...")
             else:
-                db_file = get_GDELT_data(tmpdir, date_string)
+                db_file = get_GDELT_data(tmpdir, wrkdir, date_string)
 
             matched = match_urls(db_file, target_sources_path, date_string)
             urls = collect_urls(matched, db_file, date_string)
