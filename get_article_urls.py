@@ -60,15 +60,15 @@ def get_GDELT_data(tmpdir, date_string):
         with open(fileout, 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
 
-    # os.remove(filename)
+    os.remove(filename)
 
     sprint(f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
 
     return fileout
 
 @dask.delayed
-def populate_sql(file):
-    print(f"\n\nCreating SQLite DB from {file}...")
+def populate_sql(file, date_string):
+    sprint(f"\n\nCreating SQLite DB from {file}...")
 
     j = 1
     chunksize = int(1e6)
@@ -82,15 +82,15 @@ def populate_sql(file):
                     desc=f"Populating {db_path.split('/')[-1]}", total = 10):
         df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
         df.index += j
-        df.to_sql("urls_table", urls_database, if_exists='append')
+        df.to_sql(f"{date_string}_urls_table", urls_database, if_exists='append')
         j = df.index[-1] + 1
 
 
-    urls_database.execute("CREATE INDEX urls_index ON urls_table(FrontPageURL)")
+    urls_database.execute(f"CREATE INDEX urls_index ON {date_string}_urls_table(FrontPageURL)")
 
     os.remove(file)
 
-    print(f"\n\nDB file {db_file} saved")
+    sprint(f"\n\nDB file {db_file} saved")
     return db_path
 
 def extract_domain(url):
@@ -123,15 +123,15 @@ def get_matches(match_row, idx_LU = get_target_sources()):
         return (LU.index(match[0]), match[0], match[1])
 
 @dask.delayed
-def match_urls(db_file, target_sources_path):  
+def match_urls(db_file, target_sources_path, date_string):  
 
     urls_database = create_engine(db_file)
 
-    print(f"\n\nGetting target sources from {target_sources_path}...")
+    sprint(f"\n\nGetting target sources from {target_sources_path}...\n")
     target_sources = get_target_sources(target_sources_path)
 
-    print("\n\nMatching target and GDELT URLs...")
-    query = """SELECT DISTINCT FrontPageURL FROM urls_table"""
+    sprint("\n\nMatching target and GDELT URLs...\n")
+    query = f"""SELECT DISTINCT FrontPageURL FROM {date_string}_urls_table"""
     unique_frontPage_urls = pd.read_sql_query(query, urls_database)
     unique_frontPage_urls['top_level_domain'] = [extract_domain(url) for url in unique_frontPage_urls.FrontPageURL]
 
@@ -157,20 +157,20 @@ def match_urls(db_file, target_sources_path):
     return res
     
 
-def get_article_links(source, urls_database):
+def get_article_links(source, urls_database, date_string):
     gdelt_url = f'"{source.gdelt_url}"'
     tld = source.top_level_domain
-    query = f"""SELECT LinkURL FROM urls_table WHERE FrontPageURL = {gdelt_url}"""
+    query = f"""SELECT LinkURL FROM {date_string}_urls_table WHERE FrontPageURL = {gdelt_url}"""
     links = pd.read_sql_query(query, urls_database)
     links['top_level_domain'] = links['LinkURL'].map(extract_domain)
     return list(set(links[links.top_level_domain == tld].LinkURL))
 
 @dask.delayed
-def collect_urls(matched, db_file):
+def collect_urls(matched, db_file, date_string):
     print("\n\nCollecting article URLs...")
     urls_database = create_engine(db_file)
     res = matched.copy()
-    res['article_links'] = res.apply(lambda x: get_article_links(x, urls_database), axis=1)
+    res['article_links'] = res.apply(lambda x: get_article_links(x, urls_database, date_string), axis=1)
     return res
 
 @dask.delayed
@@ -243,14 +243,14 @@ def get_urls(dates, target_sources_path=None):
             print(f"\n\tDB file {db_file} exists! Continuing...")
         else:
             filename = get_GDELT_data(tmpdir, date_string)
-            db_file = populate_sql(filename)
+            db_file = populate_sql(filename, date_string)
 
         urls_path = f"{wrkdir}/data/{date_string}_urls.pkl"
         if os.path.exists(db_path):
             print(f"\n\tURL file {date_string}_urls.pkl exists! Continuing...")
         else:
-            matched = match_urls(db_file, target_sources_path)
-            urls = collect_urls(matched, db_file)
+            matched = match_urls(db_file, target_sources_path, date_string)
+            urls = collect_urls(matched, db_file, date_string)
             urls_path = save_urls(urls, urls_path)
 
         res.append(urls_path)
