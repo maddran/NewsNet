@@ -68,7 +68,6 @@ def get_GDELT_data(tmpdir, date_string):
 
 @dask.delayed
 def populate_sql(file, date_string):
-    sprint(f"\n\nCreating SQLite DB from {file}...")
     
     j = 1
     chunksize = int(1e6)
@@ -76,6 +75,8 @@ def populate_sql(file, date_string):
 
     tmp_db_path = f"sqlite:///{db_file}"
     urls_database = create_engine(tmp_db_path)
+
+    sprint(f"\n\nCreating SQLite DB from {file} at {tmp_db_path}...")
 
     for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, 
                                 sep='\t', header=None, error_bad_lines = False), 
