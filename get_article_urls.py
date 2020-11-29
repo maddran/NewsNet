@@ -242,7 +242,6 @@ def get_urls(dates, target_sources_path=None):
         urls_path = f"{wrkdir}/data/{date_string}_urls.pkl"
         if os.path.exists(urls_path):
             print(f"\n\tURL file {date_string}_urls.pkl exists! Continuing...")
-            continue
         else:
             if os.path.exists(db_path):
                 db_file = f"sqlite:///{db_path}"
