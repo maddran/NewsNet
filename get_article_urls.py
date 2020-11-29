@@ -64,6 +64,8 @@ def get_GDELT_data(tmpdir, date_string):
 
     sprint(f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
 
+    populate_sql(fileout, date_string)
+
     return fileout
 
 @dask.delayed
@@ -228,8 +230,11 @@ def get_urls(dates, target_sources_path=None):
     res = []
     wrkdir = os.path.dirname(cwd())
 
-    os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
-    tmpdir = f"{wrkdir}/tmp"
+    if tmp():
+        tmpdir = tmp()
+    else:
+        os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
+        tmpdir = f"{wrkdir}/tmp"
 
     try:
         os.mkdir(f"{wrkdir}/data")
@@ -248,8 +253,7 @@ def get_urls(dates, target_sources_path=None):
                 db_file = f"sqlite:///{db_path}"
                 print(f"\n\tDB file {db_file} exists! Continuing...")
             else:
-                filename = get_GDELT_data(tmpdir, date_string)
-                db_file = populate_sql(filename, date_string)
+                db_file = get_GDELT_data(tmpdir, date_string)
 
             matched = match_urls(db_file, target_sources_path, date_string)
             urls = collect_urls(matched, db_file, date_string)
