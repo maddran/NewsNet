@@ -69,13 +69,13 @@ def get_GDELT_data(tmpdir, date_string):
 @dask.delayed
 def populate_sql(file, date_string):
     sprint(f"\n\nCreating SQLite DB from {file}...")
-
+    
     j = 1
     chunksize = int(1e6)
-    db_file = f"{file.split('.')[0]}.db"
+    db_file = f"{tmp()}/{date_string}.db"
 
-    db_path = f"sqlite:///{db_file}"
-    urls_database = create_engine(db_path)
+    tmp_db_path = f"sqlite:///{db_file}"
+    urls_database = create_engine(tmp_db_path)
 
     for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, 
                                 sep='\t', header=None, error_bad_lines = False), 
@@ -89,6 +89,8 @@ def populate_sql(file, date_string):
     urls_database.execute(f"CREATE INDEX urls_index ON urls_table(FrontPageURL)")
 
     os.remove(file)
+    final_db_path = f"sqlite:///{file.split('.')[0]}.db"
+    os.replace(tmp_db_path, final_db_path)
 
     sprint(f"\n\nDB file {db_file} saved")
     return db_path
@@ -223,11 +225,8 @@ def get_urls(dates, target_sources_path=None):
     res = []
     wrkdir = os.path.dirname(cwd())
 
-    if tmp():
-        tmpdir = tmp()
-    else:
-        os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
-        tmpdir = f"{wrkdir}/tmp"
+    os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
+    tmpdir = f"{wrkdir}/tmp"
 
     try:
         os.mkdir(f"{wrkdir}/data")
