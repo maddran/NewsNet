@@ -94,7 +94,7 @@ def populate_sql(file, date_string):
     shutil.move(tmp_db_path.split('sqlite:///')[-1], 
                 final_db_path.split('sqlite:///')[-1])
 
-    sprint(f"\n\nDB file {final_db_file} saved")
+    sprint(f"\n\nDB file {final_db_path.split('/')[-1]} saved")
     return final_db_path
 
 def extract_domain(url):
