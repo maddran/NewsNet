@@ -247,7 +247,6 @@ def get_urls(dates, target_sources_path=None):
             if os.path.exists(db_path):
                 db_file = f"sqlite:///{db_path}"
                 print(f"\n\tDB file {db_file} exists! Continuing...")
-                continue
             else:
                 filename = get_GDELT_data(tmpdir, date_string)
                 db_file = populate_sql(filename, date_string)
