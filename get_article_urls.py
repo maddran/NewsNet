@@ -51,6 +51,8 @@ def get_GDELT_data(tmpdir, date_string):
 
     download(url, filename)
 
+    sys.stdout.write(f"\n\nSaved {filename}...")
+
     print(f"\n\nSaved {filename}...")
         
     fileout = filename.split(".")[0] + ".txt"
