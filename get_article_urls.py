@@ -60,7 +60,7 @@ def get_GDELT_data(tmpdir, date_string):
         with open(fileout, 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
 
-    os.remove(filename)
+    # os.remove(filename)
 
     sprint(f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
 
