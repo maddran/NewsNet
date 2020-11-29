@@ -108,6 +108,8 @@ def get_target_sources(filepath = None):
     if filepath == None:
         filepath = f'{cwd()}/sources_emm.csv'
 
+     sprint(f"\n\nGetting target sources from {target_sources_path}...\n")
+
     target_sources = pd.read_csv(filepath, delimiter='\t', keep_default_na=False)
     target_sources["top_level_domain"] = [extract_domain(url) for url in target_sources.url]
     target_sources = target_sources[pd.notna(target_sources['top_level_domain'])]
@@ -131,7 +133,6 @@ def match_urls(db_file, target_sources_path, date_string):
 
     urls_database = create_engine(db_file)
 
-    sprint(f"\n\nGetting target sources from {target_sources_path}...\n")
     target_sources = get_target_sources(target_sources_path)
 
     sprint("\n\nMatching target and GDELT URLs...\n")
@@ -249,7 +250,7 @@ def get_urls(dates, target_sources_path=None):
             else:
                 filename = get_GDELT_data(tmpdir, date_string)
                 db_file = populate_sql(filename, date_string)
-                
+
             matched = match_urls(db_file, target_sources_path, date_string)
             urls = collect_urls(matched, db_file, date_string)
             urls_path = save_urls(urls, urls_path)
