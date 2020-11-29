@@ -217,8 +217,8 @@ def pruneLinks(urlfiles):
     pruned.to_pickle(pruned_path)
 
     num_links_pruned = sum(pruned["num_links"])
-    print(f"\n\nPruned {round((num_links - num_links_pruned)/num_links, 2)*100} % of URLs ({num_links_pruned} total URLs left).")
-    print(f"Saving pruned URLs to {pruned_path}...")
+    sprint(f"\n\nPruned {round((num_links - num_links_pruned)/num_links, 2)*100} % of URLs ({num_links_pruned} total URLs left).")
+    sprint(f"Saving pruned URLs to {pruned_path}...")
 
     return pruned
 
