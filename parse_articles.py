@@ -179,25 +179,26 @@ def launch_dash(urlfile):
     from dask.distributed import Client
     client = Client()
 
-    date_string = urlfile.split('/')[-1].split('_')[0]
-    print(f"\n\nParsing {date_string} articles...")
+    with Client() as client:
+        date_string = urlfile.split('/')[-1].split('_')[0]
+        print(f"\n\nParsing {date_string} articles...")
 
-    pruned = pd.read_pickle(urlfile)
-    pruned = pruned.explode('article_links').reset_index(drop=True).head(200)
-    pruned['parsed_article'] = [{}]*len(pruned)
+        pruned = pd.read_pickle(urlfile)
+        pruned = pruned.explode('article_links').reset_index(drop=True).head(200)
+        pruned['parsed_article'] = [{}]*len(pruned)
 
-    ddf = dd.from_pandas(pruned, npartitions=100)
-    parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
-    # parsed.visualize(filename="parse_articles_graph.svg")
-    parsed = parsed.compute()
+        ddf = dd.from_pandas(pruned, npartitions=100)
+        parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
+        # parsed.visualize(filename="parse_articles_graph.svg")
+        parsed = parsed.compute()
 
-    filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
+        filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
 
-    if not os.path.exists(f"{cwd()}/parsed"):
-        os.mkdir(f"{cwd()}/parsed")
+        if not os.path.exists(f"{cwd()}/parsed"):
+            os.mkdir(f"{cwd()}/parsed")
 
-    write_parsed(parsed, filename)
-    client.shutdown()
+        write_parsed(parsed, filename)
+        client.shutdown()
 
 
 if __name__ == "__main__":

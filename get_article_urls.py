@@ -91,7 +91,8 @@ def populate_sql(file, date_string):
 
     os.remove(file)
     final_db_path = f"sqlite:///{file.split('.')[0]}.db"
-    os.replace(tmp_db_path, final_db_path)
+    os.replace(tmp_db_path.split('sqlite:///')[-1], 
+                final_db_path.split('sqlite:///')[-1])
 
     sprint(f"\n\nDB file {final_db_file} saved")
     return final_db_path
@@ -238,20 +239,21 @@ def get_urls(dates, target_sources_path=None):
         date_string = date.strftime("%Y%m%d%H%M%S")
 
         db_path = f"{tmpdir}/{date_string}.db"
-        if os.path.exists(db_path):
-            db_file = f"sqlite:///{db_path}"
-            print(f"\n\tDB file {db_file} exists! Continuing...")
-        else:
-            filename = get_GDELT_data(tmpdir, date_string)
-            db_file = populate_sql(filename, date_string)
-
         urls_path = f"{wrkdir}/data/{date_string}_urls.pkl"
-        if os.path.exists(db_path):
+        if os.path.exists(urls_path):
             print(f"\n\tURL file {date_string}_urls.pkl exists! Continuing...")
+            continue
         else:
-            matched = match_urls(db_file, target_sources_path, date_string)
-            urls = collect_urls(matched, db_file, date_string)
-            urls_path = save_urls(urls, urls_path)
+            if os.path.exists(db_path):
+                db_file = f"sqlite:///{db_path}"
+                print(f"\n\tDB file {db_file} exists! Continuing...")
+                continue
+            else:
+                filename = get_GDELT_data(tmpdir, date_string)
+                db_file = populate_sql(filename, date_string)
+                matched = match_urls(db_file, target_sources_path, date_string)
+                urls = collect_urls(matched, db_file, date_string)
+                urls_path = save_urls(urls, urls_path)
 
         res.append(urls_path)
 
