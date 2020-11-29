@@ -79,7 +79,7 @@ def populate_sql(file, date_string):
 
     for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, 
                                 sep='\t', header=None, error_bad_lines = False), 
-                    desc=f"Populating {db_path.split('/')[-1]}", total = 10):
+                    desc=f"Populating {tmp_db_path.split('/')[-1]}", total = 10):
         df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
         df.index += j
         df.to_sql(f"urls_table", urls_database, if_exists='append')
