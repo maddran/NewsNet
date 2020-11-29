@@ -92,8 +92,8 @@ def populate_sql(file, date_string):
     final_db_path = f"sqlite:///{file.split('.')[0]}.db"
     os.replace(tmp_db_path, final_db_path)
 
-    sprint(f"\n\nDB file {db_file} saved")
-    return db_path
+    sprint(f"\n\nDB file {final_db_file} saved")
+    return final_db_path
 
 def extract_domain(url):
     try:
