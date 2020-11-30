@@ -3,7 +3,7 @@ from dask_jobqueue import SLURMCluster
 import pandas as pd
 import numpy as np
 import argparse
-import os
+import os, sys
 
 from parse_articles import main as parse_main
 
