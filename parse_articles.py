@@ -190,34 +190,31 @@ def launch_dask(urlfile):
     date_string = urlfile.split('/')[-1].split('_')[0]
     print(f"\n\nParsing {date_string} articles...")
 
-    pruned = pd.read_pickle(urlfile)
-    pruned = pruned.explode('article_links').reset_index(drop=False).groupby('index').head(10)
+    # pruned = pd.read_pickle(urlfile)
+    # pruned = pruned.explode('article_links').reset_index(drop=False).groupby('index').head(10)
     pruned['parsed_article'] = [{}]*len(pruned)
-    ddf = dd.from_pandas(pruned, npartitions=100)
+    ddf = dd.from_pandas(pruned, npartitions=10)
     parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
 
     return parsed
   
         
 def main(args):
-    urlfiles = sorted(glob.glob(f"{cwd()}/data/*urls_pruned.pkl"))
-    if not urlfiles:
-        urlfiles = sorted(glob.glob(f"data/*urls_pruned.pkl"))
+    urlfile = args.url_file
     
     if not os.path.exists(f"{cwd()}/parsed"):
         os.mkdir(f"{cwd()}/parsed")
     
-    for i, urlfile in enumerate(urlfiles):
-        parsed = launch_dask(urlfile)
-        date_string = urlfile.split('/')[-1].split('_')[0]
-        filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
+    parsed = launch_dask(urlfile)
+    date_string = urlfile.split('/')[-1].split('_')[0]
+    filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
 
-        if args.visualize:
-            parsed.visualize(
-                filename=f"parse_articles_graph_{date_string}.svg")
-        else:
-            parsed = parsed.compute()
-            write_parsed(parsed, filename)
+    if args.visualize:
+        parsed.visualize(
+            filename=f"parse_articles_graph_{date_string}.svg")
+    else:
+        parsed = parsed.compute()
+        write_parsed(parsed, filename)
         
 
 if __name__ == "__main__":
@@ -225,7 +222,10 @@ if __name__ == "__main__":
 
     parser.add_argument("--visualize", action='store_true', required=False,
                         help="skips computation and outputs graph (requires graphviz installed)")
+    parser.add_argument("--url_file", required=True, type=int,
+                        help="full path of the file to be parsed")
     args = parser.parse_args()
+    
     main(args)
 
     
