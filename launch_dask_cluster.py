@@ -55,6 +55,7 @@ def main(args):
             project = args.project)
 
         with Client(cluster) as client:
+            print("\n\nLaunching Dask SLURM cluster...\n\n")
             cluster.adapt(maximum_memory="300GB")
             run_parse(args, split_files)
     else:
