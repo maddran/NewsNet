@@ -32,8 +32,8 @@ def is_valid_file(parser, arg):
 def run_parse(args, split_files):
     for file in split_files:
         update_args(args, file)
-        print(args)
-        # parse_main(args)
+        # print(args)
+        parse_main(args)
     [os.remove(sf) for sf in split_files]
 
 
