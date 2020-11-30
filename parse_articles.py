@@ -188,7 +188,8 @@ def parse_article(row):
 def launch_dask(urlfile):
 
     date_string = urlfile.split('/')[-1].split('_')[0]
-    print(f"\n\nParsing {date_string} articles...")
+    part = urlfile.split('_')[-1].split('_')[0]
+    print(f"\n\nParsing {date_string} part {int(part)}/4 ...")
 
     pruned = pd.read_pickle(urlfile)
     # pruned = pruned.explode('article_links').reset_index(drop=False).groupby('index').head(10)
