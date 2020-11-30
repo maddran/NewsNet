@@ -61,7 +61,7 @@ def main(args):
         with Client(cluster) as client:
             print("\n\nLaunching Dask SLURM cluster...")
             print(client)
-            client.upload_file('parse_articles.py')
+            client.upload_file('newsnet/parse_articles.py')
 
             cluster.adapt(maximum_memory="300GB")
             _ = [run_parse(args, file) for file in split_files]
