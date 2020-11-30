@@ -61,9 +61,9 @@ def main(args):
         with Client(cluster) as client:
             print("\n\nLaunching Dask SLURM cluster...")
             cluster.scale(4)
-            client.upload_file(
-                f'{os.path.dirname(os.path.abspath(sys.argv[0]))}/parse_articles.py')
-            print(client.run(os.getcwd))
+            to_upload = f'{os.path.dirname(os.path.abspath(sys.argv[0]))}/parse_articles.py'
+            client.upload_file(to_upload)
+            print(to_upload)
             _ = [run_parse(args, file) for file in split_files]
             [os.remove(sf) for sf in split_files]
     else:
