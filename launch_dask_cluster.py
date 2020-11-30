@@ -63,7 +63,7 @@ def main(args):
             cluster.scale(4)
             client.upload_file(
                 f'{os.path.dirname(os.path.abspath(sys.argv[0]))}/parse_articles.py')
-            print(client)
+            print(client.run(os.getcwd))
             _ = [run_parse(args, file) for file in split_files]
             [os.remove(sf) for sf in split_files]
     else:
