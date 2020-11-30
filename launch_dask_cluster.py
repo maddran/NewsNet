@@ -44,9 +44,11 @@ def main(args):
 
     if args.distribute:
         extra_args = [
-                "--mail-type=ALL",
-                "--mail-user=madhav.narendran@helsinki.fi"'
-                "--gres=nvme:100"]
+            "-J newsnet_worker"
+            "--mail-type=ALL",
+            "--mail-user=madhav.narendran@helsinki.fi"'
+            "--gres=nvme:100"]
+            
         cluster = SLURMCluster(
             name = "newsnet_worker",
             cores = 20,
