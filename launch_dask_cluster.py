@@ -61,7 +61,9 @@ def main(args):
             job_extra = extra_args)
 
         with Client(cluster) as client:
-            print("\n\nLaunching Dask SLURM cluster...\n\n")
+            print("\n\nLaunching Dask SLURM cluster...")
+            print(client)
+
             cluster.adapt(maximum_memory="300GB")
             run_parse(args, split_files)
     else:
