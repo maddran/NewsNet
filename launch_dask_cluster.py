@@ -29,12 +29,10 @@ def is_valid_file(parser, arg):
     else:
         return arg
 
-def run_parse(args, split_files):
-    for file in split_files:
-        update_args(args, file)
-        # print(args)
-        parse_main(args)
-    [os.remove(sf) for sf in split_files]
+def run_parse(args, file):
+    update_args(args, file)
+    parse_main(args)
+    
 
 
 def main(args):
@@ -63,13 +61,15 @@ def main(args):
         with Client(cluster) as client:
             print("\n\nLaunching Dask SLURM cluster...")
             print(client)
+            client.upload_file('parse_articles.py')
 
             cluster.adapt(maximum_memory="300GB")
-            run_parse(args, split_files)
+            _ = [run_parse(args, file) for file in split_files]
+            [os.remove(sf) for sf in split_files]
     else:
         with Client() as client:
-            run_parse(args, split_files)
-    
+            _ = [run_parse(args, file) for file in split_files]
+            [os.remove(sf) for sf in split_files]
 
 
 if __name__ == "__main__":
