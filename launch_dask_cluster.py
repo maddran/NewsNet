@@ -43,16 +43,20 @@ def main(args):
 
 
     if args.distribute:
+        extra_args = [
+                "--mail-type=ALL",
+                "--mail-user=madhav.narendran@helsinki.fi"'
+                "--gres=nvme:100"]
         cluster = SLURMCluster(
             name = "newsnet_worker",
             cores = 20,
-            processes=10,
             memory="2GB",
             queue="small",
             walltime="3:00:00",
             local_directory = '/tmp',
             log_directory = f"{os.environ.get('PWD')}/dask-worker-space",
-            project = args.project)
+            project = args.project,
+            job_extra = extra_args)
 
         with Client(cluster) as client:
             print("\n\nLaunching Dask SLURM cluster...\n\n")
