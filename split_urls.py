@@ -27,3 +27,7 @@ if __name__ == "__main__":
                         help="number of files to split into")
     parser.add_argument("--url_file", required=True, type=lambda x: is_valid_file(parser, x),
                         help="full path of the url file to be parsed")
+
+    args = parser.parse_args()
+
+    split_file(args.url_file, args.num_splits)
