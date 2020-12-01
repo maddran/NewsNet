@@ -11,6 +11,8 @@ def split_file(url_file, n):
         s.to_pickle(filepath)
         url_files.append(filepath)
 
+    print(f"{url_file} was split into {n} files {url_files}")
+
 
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
@@ -20,6 +22,7 @@ def is_valid_file(parser, arg):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project", required=True, type=str,
-                        help="The project to bill computation to. String of the form (project_200xxxx)")
+    parser.add_argument("--num_splits", required=True, type=int,
+                        help="number of files to split into")
     parser.add_argument("--url_file", required=True, type=lambda x: is_valid_file(parser, x),
+                        help="full path of the url file to be parsed")
