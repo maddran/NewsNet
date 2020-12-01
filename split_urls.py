@@ -14,7 +14,7 @@ def split_file(url_file, n):
         url_files.append(filepath)
 
     nl = '\n'
-    file_string = nl.join[f'{i} -> {uf}' for i, uf in enumerate(url_files)]
+    file_string = nl.join[f"{i} -> {uf}" for i, uf in enumerate(url_files)]
     print(f"{url_file} was split into {n} files:{nl}{nl}{file_string}")
 
 
