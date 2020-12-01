@@ -13,7 +13,7 @@ def split_file(url_file, n):
         s.to_pickle(filepath)
         url_files.append(filepath)
 
-    print(f"{url_file} was split into {n} files {url_files}")
+    print(f"{url_file} was split into {n} files:\n\n{'\n'.join[f'{i} - {uf}' for i,uf in enumerate(url_files)]}")
 
 
 def is_valid_file(parser, arg):
