@@ -207,7 +207,7 @@ def main(args):
         os.mkdir(f"{cwd()}/parsed")
     
     parsed = launch_dask(urlfile)
-    date_string = urlfile.split('/')[-1].split('_')[0]
+    date_string = urlfile.split('/')[-1].split('.')[0]
     filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
 
     if args.visualize:
@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--visualize", action='store_true', required=False,
                         help="skips computation and outputs graph (requires graphviz installed)")
-    parser.add_argument("--url_file", required=True, type=int,
+    parser.add_argument("--url_file", required=True, type=str,
                         help="full path of the file to be parsed")
     args = parser.parse_args()
     
