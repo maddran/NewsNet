@@ -14,7 +14,8 @@ def split_file(url_file, n):
         url_files.append(filepath)
 
     nl = '\n'
-    print(f"{url_file} was split into {n} files:{nl}{nl}{nl.join[f'{i} - {uf}' for i,uf in enumerate(url_files)]}")
+    file_string = nl.join[f'{i} -> {uf}' for i, uf in enumerate(url_files)]
+    print(f"{url_file} was split into {n} files:{nl}{nl}{file_string}")
 
 
 def is_valid_file(parser, arg):
