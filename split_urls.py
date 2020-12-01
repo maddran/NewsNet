@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import argparse
+import os
 
 def split_file(url_file, n):
     df = pd.read_pickle(url_file)
