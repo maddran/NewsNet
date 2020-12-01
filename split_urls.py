@@ -15,7 +15,7 @@ def split_file(url_file, n):
 
     nl = '\n'
     file_string = nl.join([f"{i} -> {uf}" for i, uf in enumerate(url_files)])
-    print(f"{url_file} was split into {n} files:{nl}{nl}{file_string}")
+    print(f"{url_file} was split into {n} files:{nl}{nl}{file_string}{nl}")
 
 
 def is_valid_file(parser, arg):
