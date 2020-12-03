@@ -8,7 +8,7 @@ def get_links(file):
     df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
     df_res = pd.concat([df.loc[:,['index', 'top_level_domain']],
                         df_articles.loc[:,['external_links', 'parsed_date']]], axis = 1)
-    print(df_res.explode('enternal_links').head(5))
+    print(df_res.explode('external_links').head(5))
 
 def get_source_tld():
     pass
