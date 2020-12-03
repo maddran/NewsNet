@@ -14,7 +14,8 @@ def get_links(file, source_tlds):
     df_res = df_res[df_res['external_links'].isin(source_tlds.keys())]
     df_res.columns = ['from_index', 'from_tld', 'to_tld', 'parsed_date']
     df_res['to_index'] = [source_tlds[tld] for tld in df_res['to_tld']]
-    return df_res
+
+    return df_res.loc[:,['from_index', 'to_index', 'parsed_date']]
 
 def get_source_tlds(source_file):
     df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
