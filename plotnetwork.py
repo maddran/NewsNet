@@ -6,7 +6,7 @@ from collections import Counter
 from datetime import datetime
 import time
 
-import matplotlib. pyplot as plt
+import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import cm
 import plotly.graph_objects as go
