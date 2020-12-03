@@ -9,7 +9,7 @@ def get_links(file):
     df_res = pd.concat([df.loc[:,['index', 'top_level_domain']],
                         df_articles.loc[:,['external_links', 'parsed_date']]], axis = 1)
     df_res = df_res[df_res['external_links'].notna()]
-    df_res = df_res.explode('external_links').reset_index(keep=False)
+    df_res = df_res.explode('external_links').reset_index(drop=True)
     return df_res
 
 def get_source_tld():
