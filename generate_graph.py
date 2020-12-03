@@ -7,7 +7,8 @@ def get_links(file):
     df = df.loc[:,['index', 'parsed_date','top_level_domain', 'external_links']]
     print(df.explod('enternal_links').head(5))
 
-def get_source_tlds
+def get_source_tld():
+    pass
 
 
 def is_valid_file(parser, arg):
