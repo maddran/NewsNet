@@ -4,11 +4,14 @@ import os, sys
 
 def get_links(file):
     df = pd.read_pickle(file)
-    print(df.head(5))
+    df = df.loc[:,['index', 'parsed_date','top_level_domain', 'external_links']]
+    print(df.explod('enternal_links').head(5))
+
+def get_source_tlds
 
 
 def is_valid_file(parser, arg):
-    if not os.path.exists(arg):
+    if not os.path.exists(arg)
         parser.error("The file %s does not exist!" % arg)
     else:
         return arg
