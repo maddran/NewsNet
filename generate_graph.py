@@ -6,8 +6,9 @@ def get_links(file):
     df = pd.read_pickle(file)
     df = df[df['parsed_article'].notna()]
     df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
-    # df = df.loc[:,['index','top_level_domain', 'external_links']]
-    print(df_articles.columns)
+    df_res = pd.concat([df.loc[:,['index', 'top_level_domain']],
+                        df_articles.loc[:,['external_links', 'parsed_date']]])
+    print(df_res.head())
     # print(df.explode('enternal_links').head(5))
 
 def get_source_tld():
