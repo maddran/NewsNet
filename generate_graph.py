@@ -11,7 +11,7 @@ def get_links(file, source_tlds):
                         df_articles.loc[:,['external_links', 'parsed_date']]], axis = 1)
     df_res = df_res[df_res['external_links'].notna()]
     df_res = df_res.explode('external_links').reset_index(drop=True)
-    df_res = df_res[df_res['top_level_domain'].isin(source_tlds)]
+    df_res = df_res[df_res['external_links'].isin(source_tlds)]
     return df_res
 
 def get_source_tlds(source_file):
