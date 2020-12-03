@@ -8,7 +8,9 @@ def get_links(file):
     df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
     df_res = pd.concat([df.loc[:,['index', 'top_level_domain']],
                         df_articles.loc[:,['external_links', 'parsed_date']]], axis = 1)
-    print(df_res.explode('external_links').head(5))
+    df_res = df_res[df_res['external_links'].notna()]
+    df_res = df_res.explode('external_links').reset_index(keep=False)
+    return df_res
 
 def get_source_tld():
     pass
@@ -27,4 +29,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    _ = [get_links(file) for file in args.url_files] 
+     = [get_links(file) for file in args.url_files] 
