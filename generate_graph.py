@@ -14,7 +14,7 @@ def get_links(file):
     return df_res
 
 def get_source_tlds(source_file):
-    df = pd.read_csv(source_file)
+    df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
     print(df.coulmns)
 
 def extract_domain(url):
