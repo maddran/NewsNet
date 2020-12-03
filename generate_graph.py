@@ -4,7 +4,7 @@ import os, sys
 
 def get_links(file):
     df = pd.read_pickle(file)
-    df_articles = pd.DataFrame(df['parsed_article'].values, index = df.index)
+    df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
     # df = df.loc[:,['index','top_level_domain', 'external_links']]
     print(df_articles.columns)
     # print(df.explode('enternal_links').head(5))
