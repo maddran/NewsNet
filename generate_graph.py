@@ -15,7 +15,7 @@ def get_links(file):
 
 def get_source_tlds(source_file):
     df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
-    print(df.columns)
+    return list(df['url'].apply(extract_domain))
 
 def extract_domain(url):
     try:
@@ -41,6 +41,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     source_tlds = get_source_tlds(args.source_file)
+    print(source_tlds)
 
     # link_dfs = [get_links(file) for file in args.url_files] 
 
