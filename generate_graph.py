@@ -11,12 +11,15 @@ def get_links(file, source_tlds):
                         df_articles.loc[:,['external_links', 'parsed_date']]], axis = 1)
     df_res = df_res[df_res['external_links'].notna()]
     df_res = df_res.explode('external_links').reset_index(drop=True)
-    df_res = df_res[df_res['external_links'].isin(source_tlds)]
+    df_res = df_res[df_res['external_links'].isin(source_tlds.keys)]
+    df_res.columns = ['from_index', 'from_tld', 'to_tld', 'parsed_date']
+    df_res['to_index'] = [source_tlds[tld] for tld in df_res['to_tld']]
     return df_res
 
 def get_source_tlds(source_file):
     df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
-    return list(df['url'].apply(extract_domain))
+    tlds = list(df['url'].apply(extract_domain))
+    return dict(zip(tlds, df.index))
 
 def extract_domain(url):
     try:
