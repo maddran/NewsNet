@@ -192,7 +192,6 @@ def launch_dask(urlfile):
     print(f"\n\nParsing {date_string} part {int(part)+1}/4 ...")
 
     pruned = pd.read_pickle(urlfile)
-    # pruned = pruned.explode('article_links').reset_index(drop=False).groupby('index').head(10)
     pruned['parsed_article'] = [{}]*len(pruned)
     ddf = dd.from_pandas(pruned, npartitions=10)
     parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
