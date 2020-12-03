@@ -7,7 +7,7 @@ def get_links(file):
     df = df[df['parsed_article'].notna()]
     df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
     df_res = pd.concat([df.loc[:,['index', 'top_level_domain']],
-                        df_articles.loc[:,['internal_links', 'parsed_date']]])
+                        df_articles.loc[:,['internal_links', 'parsed_date']]], axis = 1)
     print(df_res.isna().sum()/len(df_res))
     # print(df.explode('enternal_links').head(5))
 
