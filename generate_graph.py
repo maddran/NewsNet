@@ -29,4 +29,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-     = [get_links(file) for file in args.url_files] 
+    link_dfs = [get_links(file) for file in args.url_files] 
+
+    links_df = pd.concat(link_dfs, axis=0)
+    print(links_df.shape, links_df.head())
