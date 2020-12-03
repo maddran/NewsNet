@@ -3,7 +3,7 @@ import argparse
 import os, sys
 import tldextract
 
-def get_links(file):
+def get_links(file, source_tlds):
     df = pd.read_pickle(file)
     df = df[df['parsed_article'].notna()]
     df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
@@ -11,6 +11,7 @@ def get_links(file):
                         df_articles.loc[:,['external_links', 'parsed_date']]], axis = 1)
     df_res = df_res[df_res['external_links'].notna()]
     df_res = df_res.explode('external_links').reset_index(drop=True)
+    df_res = df_res[df_res['top_level_domain'].isin(source_tlds)]
     return df_res
 
 def get_source_tlds(source_file):
@@ -41,9 +42,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     source_tlds = get_source_tlds(args.source_file)
-    print(source_tlds)
 
-    # link_dfs = [get_links(file) for file in args.url_files] 
+    link_dfs = [get_links(file, source_tlds) for file in args.url_files] 
 
-    # links_df = pd.concat(link_dfs, axis=0)
-    # print(links_df.shape, links_df.head())
+    links_df = pd.concat(link_dfs, axis=0)
+    print(links_df.shape, "\n", links_df.head())
