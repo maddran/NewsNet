@@ -2,6 +2,9 @@ import pandas as pd
 import argparse
 import os, sys
 import tldextract
+from urllib.request import urlopen, Request
+from bs4 import BeautifulSoup
+import json
 
 def get_links(file, source_tlds):
     df = pd.read_pickle(file)
@@ -17,8 +20,7 @@ def get_links(file, source_tlds):
 
     return df_res.loc[:,['from_index', 'to_index', 'parsed_date']]
 
-def get_source_tlds(source_file):
-    df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
+def get_source_tlds(df):
     tlds = list(df['url'].apply(extract_domain))
     return dict(zip(tlds, df.index))
 
@@ -27,7 +29,26 @@ def extract_domain(url):
         extract = tldextract.extract(url)
         return '.'.join(extract)
     except:
-        return   
+        return
+
+def get_source_locations(source_df):
+    api_key = input("Enter API key for Google GeoCoding API (Hit Enter to skip):")
+    if api_key:
+            
+def call_geocoding(row, api_key):
+    name = row["text"] + " news"
+    country = row["country"]
+    query = '+'.join(name.split() + country.split())
+
+    url = f'https://maps.googleapis.com/maps/api/geocode/json?address={query}&key={api_key}'
+
+    jsonurl = urlopen(url)
+
+    text = json.loads(jsonurl.read())
+    lat = text['results'][0]["geometry"]['location']["lat"]
+    lon = text['results'][0]["geometry"]['location']["lon"]
+
+    return (lat, lon)
 
 
 def is_valid_file(parser, arg):
@@ -45,9 +66,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    source_tlds = get_source_tlds(args.source_file)
+    source_df = pd.read_csv(args.source_file, delimiter='\t', keep_default_na=False)
+
+    if 'lat_lon' not in source_df.columns:
+        get_source_locations(source_df)
+
+    source_tlds = get_source_tlds(source_df)
 
     link_dfs = [get_links(file, source_tlds) for file in args.url_files] 
 
     links_df = pd.concat(link_dfs, axis=0)
-    print(links_df.shape, "\n", links_df.head())
+    print(links_df.shape, "\n", links_df.head(10))
