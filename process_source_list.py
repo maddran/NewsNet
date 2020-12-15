@@ -5,11 +5,15 @@ import pandas as pd
 import argparse
 import os
 
-def get_source_locations(source_df):
+def get_source_locations(source_file):
+    source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
+
+    if 'lat_lon' not in source_df.columns:
+        get_source_locations(source_df)
+
     tmp = source_df.apply(lambda x: call_geocoding(x), axis=1)
     source_df["lat_lon"] = list(tmp)
 
-    
     source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
             
 
@@ -53,7 +57,4 @@ if __name__ == "__main__":
                         help="full path of the csv file containing the source list")
 
     args = parser.parse_args()
-    source_df = pd.read_csv(args.source_file, delimiter='\t', keep_default_na=False)
-
-    if 'lat_lon' not in source_df.columns:
-        get_source_locations(source_df)
+    get_source_locations(args.source_file)
