@@ -9,6 +9,7 @@ def get_source_locations(source_df):
     tmp = source_df.apply(lambda x: call_geocoding(x), axis=1)
     source_df["lat_lon"] = list(tmp)
 
+    
     source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
             
 
