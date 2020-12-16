@@ -1,4 +1,6 @@
 import requests
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 from bs4 import BeautifulSoup
 import json
 import pandas as pd
@@ -47,7 +49,14 @@ def call_geocoding(df):
 
 def get_latlon(row, query):
     url = f"https://nominatim.openstreetmap.org/search?q={query}&format=json&country={row['country']}&countrycodes={row['country_short']}"
-    resp = requests.get(url=url)
+
+    s = requests.Session()
+    retries = Retry(total=5,
+                    backoff_factor=0.5,
+                    status_forcelist=[500, 502, 503, 504, 111])
+    s.mount('http://', HTTPAdapter(max_retries=retries))
+
+    resp = s.get(url=url)
     text = resp.json()
 
     try:
