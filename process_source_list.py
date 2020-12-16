@@ -4,20 +4,33 @@ import json
 import pandas as pd
 import argparse
 import os
+from tqdm.auto import tqdm
+from multiprocessing import Pool, cpu_count
+import numpy as np
 
 def get_source_locations(source_file):
-    source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
+  source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
+  num_processes = cpu_count()
+  chunks = chunk_df(source_df, num_processes)
 
-    if 'lat_lon' not in source_df.columns:
-        get_source_locations(source_df)
+  res = []
+  with Pool(processes=num_processes) as p:
+    for r in tqdm(p.imap(call_geocoding, chunks), total=len(chunks), desc="Getting source locations: "):
+      res.append(r)
+  
+  source_df["lat_lon"] = [val for sublist in res for val in sublist]
+  source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
 
-    tmp = source_df.apply(lambda x: call_geocoding(x), axis=1)
-    source_df["lat_lon"] = list(tmp)
+  # print(res) 
+    
+def chunk_df(df, num_processes):
+  chunks = np.array_split(df, max(10,num_processes))
+  return chunks
 
-    source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
-            
-
-def call_geocoding(row):
+def call_geocoding(df):
+  res = []
+  for row in df.iterrows():
+    row = row[1]
     name = row["text"]  # + " news"
     country = row["country"]
 
@@ -28,7 +41,8 @@ def call_geocoding(row):
       query = '+'.join(country.split())
       latlon = get_latlon(row, query)
 
-    return latlon
+    res.append(latlon)
+  return res
 
 
 def get_latlon(row, query):
@@ -42,7 +56,7 @@ def get_latlon(row, query):
     except:
       return (None, None)
 
-    return (lat, lon)
+    return (float(lat), float(lon))
 
 
 def is_valid_file(parser, arg):
