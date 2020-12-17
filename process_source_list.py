@@ -13,7 +13,7 @@ import numpy as np
 import time
 
 def get_source_locations(source_file):
-  source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
+  source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False).head(200)
   num_processes = cpu_count()
   chunks = chunk_df(source_df, num_processes)
 
@@ -50,23 +50,29 @@ def call_geocoding(df):
 
 
 def get_latlon(row, query):
-    url = f"https://nominatim.openstreetmap.org/search?q={query}&format=json&country={row['country']}&countrycodes={row['country_short']}"
+    url = f"https://nominatim.openstreetmap.org/search?q={query}&format=json&country= \
+            {row['country']}&countrycodes={row['country_short']}"
 
-    sleeptime = np.random.uniform(0, 3)
+    np.random.seed()
+    sleeptime = np.random.uniform(2, 3)
     time.sleep(sleeptime)
-    print(f"Sleeping {sleeptime}s")
+    # print(f"Sleeping {sleeptime}s")
 
     ua = UserAgent()
     headers = {'User-Agent': ua.random}
 
-    s = requests.Session()
-    retries = Retry(total=5,
-                    backoff_factor=1,
-                    status_forcelist=[500, 502, 503, 504, 111])
-    s.mount('http://', HTTPAdapter(max_retries=retries))
+    try:
+      s = requests.Session()
+      retries = Retry(total=5,
+                      backoff_factor=4,
+                      status_forcelist=[500, 502, 503, 504, 111])
+      s.mount('http://', HTTPAdapter(max_retries=retries))
 
-    resp = s.get(url=url, headers = headers)
-    text = resp.json()
+      resp = s.get(url=url, headers = headers)
+      text = resp.json()
+    except Exception as e:
+      print(e, "\n", resp)
+      return (None, None)
 
     try:
       lat = text[0]['lat']
@@ -74,6 +80,7 @@ def get_latlon(row, query):
     except:
       return (None, None)
 
+    print(f"Success! {lat}, {lon}")
     return (float(lat), float(lon))
 
 
