@@ -52,7 +52,7 @@ def get_latlon(row, query):
 
     s = requests.Session()
     retries = Retry(total=5,
-                    backoff_factor=0.5,
+                    backoff_factor=1,
                     status_forcelist=[500, 502, 503, 504, 111])
     s.mount('http://', HTTPAdapter(max_retries=retries))
 
