@@ -7,3 +7,4 @@ env/*
 *.svg
 dask*/
 parsed/*
+processed_sources.csv
