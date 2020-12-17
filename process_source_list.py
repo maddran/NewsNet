@@ -11,25 +11,6 @@ from tqdm.auto import tqdm
 import numpy as np
 import time
 
-# from multiprocessing import Pool, cpu_count
-# def get_source_locations_mp(source_file):
-#   source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False).head(200)
-#   num_processes = cpu_count()
-#   chunks = chunk_df(source_df, num_processes)
-
-#   res = []
-#   with Pool(processes=num_processes) as p:
-#     for r in tqdm(p.imap(call_geocoding, chunks), total=len(chunks), desc="Getting source locations: "):
-#       res.append(r)
-  
-#   source_df["lat_lon"] = [val for sublist in res for val in sublist]
-#   source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
-
-
-# def chunk_df(df, num_processes):
-#   chunks = np.array_split(df, max(10, num_processes))
-#   return chunks
-
 def get_source_locations(source_file):
   source_df = pd.read_csv(source_file, delimiter='\t',
                           keep_default_na=False).head(200)
@@ -69,7 +50,7 @@ def get_latlon(row, query):
       s = requests.Session()
       retries = Retry(total=5,
                       backoff_factor=4,
-                      status_forcelist=[500, 502, 503, 504, 111])
+                      status_forcelist=[500, 502, 503, 504])
       s.mount('http://', HTTPAdapter(max_retries=retries))
 
       resp = s.get(url=url, headers = headers)
@@ -84,7 +65,7 @@ def get_latlon(row, query):
     except:
       return (None, None)
 
-    print(f"Success! {lat}, {lon}")
+    # print(f"Success! {lat}, {lon}")
     return (float(lat), float(lon))
 
 
