@@ -34,7 +34,8 @@ def get_source_locations(source_file):
   source_df = pd.read_csv(source_file, delimiter='\t',
                           keep_default_na=False).head(200)
 
-  source_df["lat_lon"] = source_df.apply(call_geocoding, axis = 1)
+  tqdm.pandas()
+  source_df["lat_lon"] = source_df.progress_apply(call_geocoding, axis = 1)
   source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
 
 
