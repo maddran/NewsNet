@@ -9,6 +9,7 @@ import os
 from tqdm.auto import tqdm
 from multiprocessing import Pool, cpu_count
 import numpy as np
+import time
 
 def get_source_locations(source_file):
   source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
@@ -49,6 +50,9 @@ def call_geocoding(df):
 
 def get_latlon(row, query):
     url = f"https://nominatim.openstreetmap.org/search?q={query}&format=json&country={row['country']}&countrycodes={row['country_short']}"
+
+    sleeptime = np.random.uniform(1, 3)
+    time.sleep(sleeptime)
 
     s = requests.Session()
     retries = Retry(total=5,
