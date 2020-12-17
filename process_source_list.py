@@ -15,14 +15,21 @@ def get_source_locations(source_file):
   source_df = pd.read_csv(source_file, delimiter='\t',
                           keep_default_na=False).head(200)
 
-  tqdm.pandas()
+  tqdm.pandas(desc = "Getting source locations")
   source_df["lat_lon"] = source_df.progress_apply(call_geocoding, axis = 1)
   source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
+
+  null_locs = source_df[source_df['lat'].isnull()]
+  print(f"{len(null_locs)}/{len(source_df)}locations found")
+  print(f"Distribution of missing loactions by country:\n{null_locs['country'].value_counts()}")
 
 
 def call_geocoding(row):
   name = row["text"]
   country = row["country"]
+
+  if "latlon" in row.keys() and all(row["latlon"]):
+    return row['latlon']
 
   query = '+'.join(name.split() + country.split())
   latlon = get_latlon(row, query)
@@ -38,9 +45,9 @@ def get_latlon(row, query):
     url = f"https://nominatim.openstreetmap.org/search?q={query}&format=json&country= \
             {row['country']}&countrycodes={row['country_short']}"
 
-    np.random.seed()
-    sleeptime = np.random.uniform(1, 2)
-    time.sleep(sleeptime)
+    # np.random.seed()
+    # sleeptime = np.random.uniform(1, 2)
+    # time.sleep(sleeptime)
     # print(f"Sleeping {sleeptime}s")
 
     ua = UserAgent()
@@ -56,7 +63,7 @@ def get_latlon(row, query):
       resp = s.get(url=url, headers = headers)
       text = resp.json()
     except Exception as e:
-      print(e, "\n", resp)
+      print(f"ERROR! Unable to get location: {e}")
       return (None, None)
 
     try:
