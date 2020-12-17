@@ -8,45 +8,48 @@ import pandas as pd
 import argparse
 import os
 from tqdm.auto import tqdm
-from multiprocessing import Pool, cpu_count
 import numpy as np
 import time
 
-def get_source_locations(source_file):
-  source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False).head(200)
-  num_processes = cpu_count()
-  chunks = chunk_df(source_df, num_processes)
+# from multiprocessing import Pool, cpu_count
+# def get_source_locations_mp(source_file):
+#   source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False).head(200)
+#   num_processes = cpu_count()
+#   chunks = chunk_df(source_df, num_processes)
 
-  res = []
-  with Pool(processes=num_processes) as p:
-    for r in tqdm(p.imap(call_geocoding, chunks), total=len(chunks), desc="Getting source locations: "):
-      res.append(r)
+#   res = []
+#   with Pool(processes=num_processes) as p:
+#     for r in tqdm(p.imap(call_geocoding, chunks), total=len(chunks), desc="Getting source locations: "):
+#       res.append(r)
   
-  source_df["lat_lon"] = [val for sublist in res for val in sublist]
+#   source_df["lat_lon"] = [val for sublist in res for val in sublist]
+#   source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
+
+
+# def chunk_df(df, num_processes):
+#   chunks = np.array_split(df, max(10, num_processes))
+#   return chunks
+
+def get_source_locations(source_file):
+  source_df = pd.read_csv(source_file, delimiter='\t',
+                          keep_default_na=False).head(200)
+
+  source_df["lat_lon"] = source_df.apply(call_geocoding, axis = 1)
   source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
 
-  # print(res) 
-    
-def chunk_df(df, num_processes):
-  chunks = np.array_split(df, max(10,num_processes))
-  return chunks
 
-def call_geocoding(df):
-  res = []
-  for row in df.iterrows():
-    row = row[1]
-    name = row["text"]  # + " news"
-    country = row["country"]
+def call_geocoding(row):
+  name = row["text"]
+  country = row["country"]
 
-    query = '+'.join(name.split() + country.split())
+  query = '+'.join(name.split() + country.split())
+  latlon = get_latlon(row, query)
+
+  if not all(latlon):
+    query = '+'.join(country.split())
     latlon = get_latlon(row, query)
 
-    if not all(latlon):
-      query = '+'.join(country.split())
-      latlon = get_latlon(row, query)
-
-    res.append(latlon)
-  return res
+  return latlon
 
 
 def get_latlon(row, query):
@@ -54,7 +57,7 @@ def get_latlon(row, query):
             {row['country']}&countrycodes={row['country_short']}"
 
     np.random.seed()
-    sleeptime = np.random.uniform(2, 3)
+    sleeptime = np.random.uniform(1, 2)
     time.sleep(sleeptime)
     # print(f"Sleeping {sleeptime}s")
 
