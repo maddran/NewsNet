@@ -1,5 +1,6 @@
 import requests
 from urllib3.util.retry import Retry
+from fake_useragent import UserAgent
 from requests.adapters import HTTPAdapter
 from bs4 import BeautifulSoup
 import json
@@ -51,9 +52,12 @@ def call_geocoding(df):
 def get_latlon(row, query):
     url = f"https://nominatim.openstreetmap.org/search?q={query}&format=json&country={row['country']}&countrycodes={row['country_short']}"
 
-    sleeptime = np.random.uniform(1, 3)
+    sleeptime = np.random.uniform(0, 3)
     time.sleep(sleeptime)
     print(f"Sleeping {sleeptime}s")
+
+    ua = UserAgent()
+    headers = {'User-Agent': ua.random}
 
     s = requests.Session()
     retries = Retry(total=5,
@@ -61,7 +65,7 @@ def get_latlon(row, query):
                     status_forcelist=[500, 502, 503, 504, 111])
     s.mount('http://', HTTPAdapter(max_retries=retries))
 
-    resp = s.get(url=url)
+    resp = s.get(url=url, headers = headers)
     text = resp.json()
 
     try:
