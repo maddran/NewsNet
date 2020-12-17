@@ -53,6 +53,7 @@ def get_latlon(row, query):
 
     sleeptime = np.random.uniform(1, 3)
     time.sleep(sleeptime)
+    print(f"Sleeping {sleeptime}s")
 
     s = requests.Session()
     retries = Retry(total=5,
