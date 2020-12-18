@@ -19,7 +19,7 @@ def get_source_locations(source_file):
   source_df["lat_lon"] = source_df.progress_apply(call_geocoding, axis = 1)
   source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
 
-  null_locs = source_df[pd.DataFrame(source_df['lat_lon'].tolist().loc[:,0]).isnull()]
+  null_locs = source_df[pd.DataFrame(source_df['lat_lon'].tolist()).loc[:, 0].isnull()]
   print(f"{(len(source_df)-len(null_locs))*100/len(source_df)}% of source locations found")
   print(f"Distribution of missing loactions by country:\n{null_locs['country'].value_counts()}")
 
