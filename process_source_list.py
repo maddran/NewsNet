@@ -12,11 +12,11 @@ import numpy as np
 import time
 
 def get_source_locations(source_file):
-  source_df = pd.read_csv(source_file, delimiter='\t',
-                          keep_default_na=False)#.head(50)
+  source_df = pd.read_csv(source_file, delimiter='\t', keep_default_na=False)
 
   tqdm.pandas(desc = "Getting source locations")
-  source_df["lat_lon"] = source_df.progress_apply(call_geocoding, axis = 1)
+  latlon = source_df.progress_apply(call_geocoding, axis = 1)
+  source_df["lat"], source_df["lon"] = list(zip(*latlon))
   source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
 
   null_locs = source_df[pd.DataFrame(source_df['lat_lon'].tolist()).loc[:, 0].isnull()]
