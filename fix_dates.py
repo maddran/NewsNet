@@ -4,7 +4,7 @@ import os
 import sys
 import pandas as pd
 
-def fix_dates(file):
+def fix_dates(i, file):
     df = pd.read_pickle(file)
     df = df.apply(appl_fix)
 
