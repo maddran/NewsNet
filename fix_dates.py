@@ -6,9 +6,10 @@ import pandas as pd
 
 def fix_dates(i, file):
     df = pd.read_pickle(file)
-    df = df.apply(apply_fix)
 
     print(df.columns)
+
+    df = df.apply(apply_fix)
 
     new_file = f"{file.split('.pkl')[0]}_fixed_date.pkl"
     df.to_pickle(new_file)
