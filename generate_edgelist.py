@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # print(links_df.shape, "\n", links_df.head(10))
 
     if not os.path.exists("../edgelist"):
-        os.makedirs(directory)
+        os.makedirs("../edgelist")
 
     now = datetime.now().strftime("%d%m%Y_%H%M%S")
     links_df.to_csv(f"../edgelist/edgelist_{now}.csv")
