@@ -3,13 +3,13 @@ import argparse
 import os
 import sys
 import pandas as pd
+from tqdm import tqdm 
 
 def fix_dates(i, file):
     df = pd.read_pickle(file)
 
-    print(df.columns)
-
-    df = df.apply(apply_fix, axis = 1)
+    tqdm.pandas()
+    df = df.progress_apply(apply_fix, axis = 1)
 
     new_file = f"{file.split('.pkl')[0]}_fixed_date.pkl"
     df.to_pickle(new_file)
