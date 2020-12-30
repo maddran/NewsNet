@@ -57,7 +57,7 @@ if __name__ == "__main__":
     link_dfs = [get_links(i, file, source_tlds) for i, file in enumerate(args.parsed_files)] 
 
     links_df = pd.concat(link_dfs, axis=0)
-    parsed_date_prop = 100*(links_df.parsed_date.isna().sum()/len(links_df))
+    parsed_date_prop = 100*(1-(links_df.parsed_date.isna().sum()/len(links_df)))
     print(f"\n{len(links_df)} total links found. {round(parsed_date_prop,2)}% of publish dates found.")
 
     now = datetime.now().strftime("%d%m%Y_%H%M%S")
