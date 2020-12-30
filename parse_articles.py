@@ -14,7 +14,7 @@ import glob
 import pandas as pd
 from datetime import datetime
 import pickle
-
+from htmldate import find_date
 
 def sprint(string):
     sys.stdout.write(string)
@@ -27,13 +27,14 @@ def parse_html(article):
     soup = BeautifulSoup(article['html'], features="lxml")
 
     if article["date"] == None:
-        parsed_date = parse_date(soup)
-        if parsed_date:
-            try:
-                parsed_date = dateparse(parsed_date)
-            except:
-                parsed_date = None
+        # parsed_date = parse_date(soup)
+        # if parsed_date:
+        #     try:
+        #         parsed_date = dateparse(parsed_date)
+        #     except:
+        #         parsed_date = None
 
+        parsed_date = find_date(soup)
         article["parsed_date"] = parsed_date
     else:
         article["parsed_date"] = article['date']
