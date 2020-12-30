@@ -4,7 +4,7 @@ import os, sys
 import tldextract
 from datetime import datetime
 
-def get_links(file, source_tlds):
+def get_links(i, file, source_tlds):
     df = pd.read_pickle(file)
     df = df[df['parsed_article'].notna()]
     df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
@@ -15,6 +15,8 @@ def get_links(file, source_tlds):
     df_res = df_res[df_res['external_links'].isin(source_tlds.keys())]
     df_res.columns = ['from_index', 'from_tld', 'to_tld', 'parsed_date']
     df_res['to_index'] = [source_tlds[tld] for tld in df_res['to_tld']]
+
+    print(f"\nDone {i+1} files. {len(df_res)} total links found in {file}")
 
     return df_res.loc[:,['from_index', 'to_index', 'parsed_date']]
 
@@ -48,7 +50,8 @@ if __name__ == "__main__":
 
     source_tlds = get_source_tlds(source_df)
 
-    link_dfs = [get_links(file, source_tlds) for file in args.url_files] 
+    print(f"\nProcessing {len(args.url_files)} total files:")
+    link_dfs = [get_links(i, file, source_tlds) for i, file in enumerate(args.url_files)] 
 
     links_df = pd.concat(link_dfs, axis=0)
     # print(links_df.shape, "\n", links_df.head(10))
