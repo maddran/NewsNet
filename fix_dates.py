@@ -9,7 +9,7 @@ def fix_dates(i, file):
 
     print(df.columns)
 
-    df = df.apply(apply_fix)
+    df = df.apply(apply_fix, axis = 1)
 
     new_file = f"{file.split('.pkl')[0]}_fixed_date.pkl"
     df.to_pickle(new_file)
