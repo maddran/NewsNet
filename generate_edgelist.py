@@ -2,6 +2,7 @@ import pandas as pd
 import argparse
 import os, sys
 import tldextract
+from datetime import datetime
 
 def get_links(file, source_tlds):
     df = pd.read_pickle(file)
@@ -50,4 +51,10 @@ if __name__ == "__main__":
     link_dfs = [get_links(file, source_tlds) for file in args.url_files] 
 
     links_df = pd.concat(link_dfs, axis=0)
-    print(links_df.shape, "\n", links_df.head(10))
+    # print(links_df.shape, "\n", links_df.head(10))
+
+    if not os.path.exists("../edgelist"):
+        os.makedirs(directory)
+
+    now = datetime.now().strftime("%d%m%Y_%H%M%S")
+    links_df.to_csv(f"../edgelist/edgelist_{now}.csv")
