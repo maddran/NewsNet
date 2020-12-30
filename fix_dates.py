@@ -2,7 +2,7 @@ from parse_articles import parse_date
 import argparse
 import os
 import sys
-iport pandas as pd
+import pandas as pd
 
 def fix_dates(file):
     df = pd.read_pickle(file)
