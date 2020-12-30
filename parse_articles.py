@@ -34,8 +34,7 @@ def parse_html(article):
         #     except:
         #         parsed_date = None
 
-        parsed_date = parse_date(soup)
-        article["parsed_date"] = parsed_date
+        article["parsed_date"] = parse_date(article)
     else:
         article["parsed_date"] = article['date']
 
@@ -45,7 +44,7 @@ def parse_html(article):
     return article
 
 
-def parse_date(soup):
+def parse_date(article):
     date = None
 
     # tag_matches = ['meta[itemprop*=date]', 'time',
@@ -60,7 +59,7 @@ def parse_date(soup):
     #     if date:
     #         break
 
-    date = find_date(soup)
+    date = find_date(article['url'])
 
     return date
 
