@@ -1,4 +1,4 @@
-from parse_articles import parse_date
+from htmldate import find_date
 import argparse
 import os
 import sys
@@ -18,7 +18,7 @@ def apply_fix(row):
     if row['parsed_article']['parsed_date']:
         return row
     else:
-        row['parsed_article']['parsed_date'] = parse_date(row['parsed_article']['url'])
+        row['parsed_article']['parsed_date'] = find_date(row['parsed_article']['url'])
         return row
 
 def is_valid_file(parser, arg):
