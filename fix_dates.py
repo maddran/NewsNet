@@ -9,7 +9,7 @@ def fix_dates(i, file):
     df = df.apply(apply_fix)
 
     new_file = f"{file.split('.pkl')[0]}_fixed_date.pkl"
-    df = pd.to_pickle(new_file)
+    df.to_pickle(new_file)
 
 def apply_fix(row):
     if row['parsed_articles']['parsed_date']:
