@@ -41,5 +41,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    with Pool(min(5, cpu_count())) as pool:
+    with Pool(3) as pool:
         _ = pool.map(fix_dates, args.parsed_files)
