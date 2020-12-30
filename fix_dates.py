@@ -12,10 +12,10 @@ def fix_dates(i, file):
     df = pd.to_pickle(new_file)
 
 def apply_fix(row):
-    if row['parsed_article']['parsed_date']:
+    if row['parsed_articles']['parsed_date']:
         return row
     else:
-        row['parsed_article']['parsed_date'] = parse_date(row['parsed_article']['url'])
+        row['parsed_articles']['parsed_date'] = parse_date(row['parsed_articles']['url'])
         return row
 
 def is_valid_file(parser, arg):
