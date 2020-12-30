@@ -50,8 +50,8 @@ if __name__ == "__main__":
 
     source_tlds = get_source_tlds(source_df)
 
-    print(f"\nProcessing {len(args.url_files)} total files:")
-    link_dfs = [get_links(i, file, source_tlds) for i, file in enumerate(args.url_files)] 
+    print(f"\nProcessing {len(args.parsed_files)} total files:")
+    link_dfs = [get_links(i, file, source_tlds) for i, file in enumerate(args.parsed_files)] 
 
     links_df = pd.concat(link_dfs, axis=0)
     # print(links_df.shape, "\n", links_df.head(10))
