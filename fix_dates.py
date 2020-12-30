@@ -8,11 +8,13 @@ from tqdm import tqdm
 def fix_dates(i, file):
     df = pd.read_pickle(file)
 
-    tqdm.pandas()
+    tqdm.pandas(desc=file)
     df = df.progress_apply(apply_fix, axis = 1)
 
-    new_file = f"{file.split('.pkl')[0]}_fixed_date.pkl"
-    df.to_pickle(new_file)
+    # new_file = f"{file.split('.pkl')[0]}_fixed_date.pkl"
+    # df.to_pickle(new_file)
+
+    df.to_pickle(file)
 
 def apply_fix(row):
     if row['parsed_article']:
