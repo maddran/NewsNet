@@ -15,11 +15,14 @@ def fix_dates(i, file):
     df.to_pickle(new_file)
 
 def apply_fix(row):
-    if row['parsed_article']['parsed_date']:
-        return row
+    if row['parsed_article']:
+        if row['parsed_article']['parsed_date']:
+            pass
+        else:
+            row['parsed_article']['parsed_date'] = find_date(row['parsed_article']['url'])
     else:
-        row['parsed_article']['parsed_date'] = find_date(row['parsed_article']['url'])
-        return row
+        pass
+    return row
 
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
