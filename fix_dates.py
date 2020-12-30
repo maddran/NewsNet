@@ -4,8 +4,9 @@ import os
 import sys
 import pandas as pd
 from tqdm import tqdm 
+from multiprocessing import Pool
 
-def fix_dates(i, file):
+def fix_dates(file):
     df = pd.read_pickle(file)
 
     tqdm.pandas(desc=file)
@@ -39,4 +40,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    _ = [fix_dates(i, file) for i, file in enumerate(args.parsed_files)]
+    with Pool(multiprocessing.cpu_count()) as pool:
+        _ = pool.map(fix_dates, args.parsed_files)
