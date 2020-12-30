@@ -46,8 +46,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if not os.path.exists("/edgelist"):
-        os.makedirs("/edgelist")
+    if not os.path.exists("edgelist/"):
+        os.makedirs("edgelist")
 
     source_df = pd.read_csv(args.source_file, delimiter='\t', keep_default_na=False)
 
