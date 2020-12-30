@@ -46,6 +46,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    if not os.path.exists("/edgelist"):
+        os.makedirs("/edgelist")
+
     source_df = pd.read_csv(args.source_file, delimiter='\t', keep_default_na=False)
 
     source_tlds = get_source_tlds(source_df)
@@ -54,10 +57,7 @@ if __name__ == "__main__":
     link_dfs = [get_links(i, file, source_tlds) for i, file in enumerate(args.parsed_files)] 
 
     links_df = pd.concat(link_dfs, axis=0)
-    # print(links_df.shape, "\n", links_df.head(10))
-
-    if not os.path.exists("/edgelist"):
-        os.makedirs("/edgelist")
+    print(links_df.shape, "\n", links_df.head(10))
 
     now = datetime.now().strftime("%d%m%Y_%H%M%S")
     links_df.to_csv(f"/edgelist/edgelist_{now}.csv")
