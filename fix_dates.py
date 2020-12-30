@@ -10,7 +10,7 @@ def fix_dates(file):
     new_file = f"{file.split('.pkl')[0]}_fixed_date.pkl"
     if os.path.exists(new_file):
         return
-        
+
     df = pd.read_pickle(file)
 
     tqdm.pandas(desc=file)
@@ -41,5 +41,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    with Pool(cpu_count()) as pool:
+    with Pool(min(5, cpu_count()) as pool:
         _ = pool.map(fix_dates, args.parsed_files)
