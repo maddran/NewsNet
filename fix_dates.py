@@ -13,7 +13,7 @@ def fix_dates(file):
 
     df = pd.read_pickle(file)
 
-    tqdm.pandas(desc=f"\n{file}")
+    tqdm.pandas(desc=f"\n{file}", miniters=1000)
     df = df.progress_apply(apply_fix, axis = 1)
     
     df.to_pickle(new_file)
