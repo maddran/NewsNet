@@ -18,7 +18,7 @@ def get_source_locations(source_file):
   latlon = source_df.progress_apply(call_geocoding, axis = 1)
 
   source_df["lat"], source_df["lon"] = list(zip(*latlon))
-  source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8')
+  source_df.to_csv("processed_sources.csv", sep='\t', encoding='utf-8', index = False)
 
   null_locs = source_df[source_df['lat'].isnull()]
   print(f"{(len(source_df)-len(null_locs))*100/len(source_df)}% of source locations found")
