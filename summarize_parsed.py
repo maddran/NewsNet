@@ -2,7 +2,7 @@ import pandas as pd
 import pickle
 from glob import glob
 from parse_articles import cwd
-
+ 
 parsed_files = sorted(glob(f"{cwd()}/parsed/*parsed.pkl"))
 if not parsed_files:
     parsed_files = sorted(glob(f"parsed/*parsed.pkl"))
