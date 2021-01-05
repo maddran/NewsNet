@@ -85,9 +85,9 @@ if __name__ == "__main__":
                 f'nans = {links_df.parsed_date.isna().sum()} '
         )
         start_date = datetime.strptime(str(args.start_date), '%Y%m%d')
-        start_date = start_date - timedelta(366)
-
         end_date = start_date + timedelta(days=args.num_days)
+        
+        start_date = start_date - timedelta(366)
         end_date = end_date + timedelta(90)
 
         mask = (links_df['parsed_date'] < start_date) | (links_df['parsed_date'] > end_date)
