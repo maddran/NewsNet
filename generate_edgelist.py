@@ -89,16 +89,13 @@ if __name__ == "__main__":
                 f'nans = {links_df.parsed_date.isna().sum()} '
         )
         start_date = datetime.strptime(str(args.start_date), '%Y%m%d')
-        start_date = start_date - timedelta(90)
+        start_date = start_date - timedelta(366)
 
         end_date = start_date + timedelta(days=args.num_days)
         end_date = end_date + timedelta(90)
 
         mask = (links_df['parsed_date'] < start_date) | (links_df['parsed_date'] > end_date)
-        links_df.loc[mask, 'parsed_date'] = np.nan
-
-        print(start_date, end_date)
-        print(links_df.loc[mask, 'parsed_date'])
+        links_df.loc[mask, 'parsed_date'] = np.nan    
 
         print(
                 f'\nPost-trim: min = {min(links_df.parsed_date.dropna())} '
