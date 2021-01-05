@@ -99,6 +99,7 @@ if __name__ == "__main__":
         links_df.loc[mask, 'parsed_date'] = np.nan
 
         print(start_date, end_date)
+        print(links_df.loc[mask, 'parsed_date'])
 
         print(
                 f'\nPost-trim: min = {min(links_df.parsed_date.dropna())}'
