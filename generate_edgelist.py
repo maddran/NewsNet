@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     if args.start_date:
         print(
-                f'Pre-trim: min = {min(links_df.parsed_date.dropna())}'
+                f'\nPre-trim: min = {min(links_df.parsed_date.dropna())}'
                 f'max = {max(links_df.parsed_date.dropna())}',
                 f'nans = {links_df.parsed_date.isna().sum()}'
         )
@@ -98,8 +98,10 @@ if __name__ == "__main__":
                 (links_df['parsed_date'] > end_date))
         links_df.loc[mask, 'parsed_date'] = np.nan
 
+        print(start_date, end_date)
+
         print(
-                f'Post-trim: min = {min(links_df.parsed_date.dropna())}'
+                f'\nPost-trim: min = {min(links_df.parsed_date.dropna())}'
                 f'max = {max(links_df.parsed_date.dropna())}',
                 f'nans = {links_df.parsed_date.isna().sum()}'
         )
