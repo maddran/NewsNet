@@ -63,7 +63,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.start_date and (args.num_days is None):
-        parser.error("--start_date argument also requires --num_days")
+        parser.error("--start_date argument also requires --num_days!")
 
     if not os.path.exists("edgelist/"):
         os.makedirs("edgelist")
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     link_dfs = [get_links(i, file, source_tlds) for i, file in enumerate(args.parsed_files)] 
     links_df = pd.concat(link_dfs, axis=0)
     
-    links_df["parsed_date"] = pd.to_datetime(links_df["parsed_date"])
+    links_df["parsed_date"] = pd.to_datetime(links_df["parsed_date"], utc=True)
 
     parsed_date_prop = 100*(1-(links_df.parsed_date.isna().sum()/len(links_df)))
     print(f"\n{len(links_df)} total links found. {round(parsed_date_prop,2)}% of publish dates found.")
