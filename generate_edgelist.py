@@ -63,7 +63,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.start_date and (args.num_days is None):
-        parse.error("--start_date argument also requires --num_days")
+        parser.error("--start_date argument also requires --num_days")
 
     if not os.path.exists("edgelist/"):
         os.makedirs("edgelist")
