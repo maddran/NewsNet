@@ -78,10 +78,6 @@ if __name__ == "__main__":
     
     links_df["parsed_date"] = pd.to_datetime(links_df["parsed_date"], utc=True).dt.tz_localize(None)
 
-    parsed_date_prop = 100*(1-(links_df.parsed_date.isna().sum()/len(links_df)))
-    print(f"\n{len(links_df)} total links found. {round(parsed_date_prop,2)}% of publish dates found.")
-
-
     if args.start_date:
         print(
                 f'\nPre-trim: min = {min(links_df.parsed_date.dropna())} '
@@ -104,6 +100,9 @@ if __name__ == "__main__":
         )
 
     links_df["parsed_date"] = links_df["parsed_date"].apply(truncate_date)
+
+    parsed_date_prop = 100*(1-(links_df.parsed_date.isna().sum()/len(links_df)))
+    print(f"\n{len(links_df)} total links found. {round(parsed_date_prop,2)}% of publish dates found.")
 
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
     links_df.to_csv(f"edgelist/edgelist_{now}.csv", sep="\t", index=False)
