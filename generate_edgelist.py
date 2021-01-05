@@ -1,8 +1,9 @@
 import pandas as pd
+import numpy as np
 import argparse
 import os, sys
 import tldextract
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def get_links(i, file, source_tlds):
     df = pd.read_pickle(file)
@@ -31,6 +32,17 @@ def extract_domain(url):
     except:
         return
 
+
+def truncate_date(dt):
+    try:
+        res = np.datetime64(dt, 'D')
+        # res = dt.value.astype('<M8[D]')
+    except Exception as e:
+        # print(dt, e)
+        res = np.nan
+
+    return res
+
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
         parser.error("The file %s does not exist!" % arg)
@@ -43,8 +55,15 @@ if __name__ == "__main__":
                         nargs='+', help="full path of the parsed files to generate a network from")
     parser.add_argument("--source_file", required=True, type=lambda x: is_valid_file(parser, x),
                         help="full path of the csv file containing the source list")
+    parser.add_argument("--start_date", required=False, type=int,
+                        help="start date of period being analysed as integer in YYYYmmdd format - used to sense check parsed dates")
+    parser.add_argument("--num_days", required=False, type=int,
+                        help="number of days in period being analysed")
 
     args = parser.parse_args()
+
+    if args.start_date and (args.num_days is None):
+        parse.error("--start_date argument also requires --num_days")
 
     if not os.path.exists("edgelist/"):
         os.makedirs("edgelist")
@@ -55,10 +74,37 @@ if __name__ == "__main__":
 
     print(f"\nProcessing {len(args.parsed_files)} total files:")
     link_dfs = [get_links(i, file, source_tlds) for i, file in enumerate(args.parsed_files)] 
-
     links_df = pd.concat(link_dfs, axis=0)
+    
+    links_df["parsed_date"] = pd.to_datetime(links_df["parsed_date"])
+
     parsed_date_prop = 100*(1-(links_df.parsed_date.isna().sum()/len(links_df)))
     print(f"\n{len(links_df)} total links found. {round(parsed_date_prop,2)}% of publish dates found.")
+
+
+    if args.start_date:
+        print(
+                f'Pre-trim: min = {min(links_df.parsed_date.dropna())}'
+                f'max = {max(links_df.parsed_date.dropna())}',
+                f'nans = {links_df.parsed_date.isna().sum()}'
+        )
+        start_date = datetime.strptime(args.start_date, '%Y%m%d')
+        start_date = start_date - timedelta(months=3)
+
+        end_date = start_date + timedelta(days=args.num_days)
+        end_date = end_date + timedelta(months=3)
+
+        mask = ((links_df['parsed_date'] < start_date) & 
+                (links_df['parsed_date'] > end_date))
+        links_df.loc[mask, 'parsed_date'] = np.nan
+
+        print(
+                f'Pre-trim: min = {min(links_df.parsed_date.dropna())}'
+                f'max = {max(links_df.parsed_date.dropna())}',
+                f'nans = {links_df.parsed_date.isna().sum()}'
+        )
+
+    links_df["parsed_date"] = links_df["parsed_date"].apply(truncate_date)
 
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
     links_df.to_csv(f"edgelist/edgelist_{now}.csv", sep="\t", index=False)
