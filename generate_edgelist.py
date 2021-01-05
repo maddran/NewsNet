@@ -99,7 +99,7 @@ if __name__ == "__main__":
         links_df.loc[mask, 'parsed_date'] = np.nan
 
         print(
-                f'Pre-trim: min = {min(links_df.parsed_date.dropna())}'
+                f'Post-trim: min = {min(links_df.parsed_date.dropna())}'
                 f'max = {max(links_df.parsed_date.dropna())}',
                 f'nans = {links_df.parsed_date.isna().sum()}'
         )
