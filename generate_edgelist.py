@@ -88,7 +88,7 @@ if __name__ == "__main__":
                 f'max = {max(links_df.parsed_date.dropna())}',
                 f'nans = {links_df.parsed_date.isna().sum()}'
         )
-        start_date = datetime.strptime(args.start_date, '%Y%m%d')
+        start_date = datetime.strptime(str(args.start_date), '%Y%m%d')
         start_date = start_date - timedelta(months=3)
 
         end_date = start_date + timedelta(days=args.num_days)
