@@ -114,6 +114,7 @@ def predict_pipeline(text, model_path='news_classifier.pt'):
     pred_cats2 = np.concatenate(pred_cats2).ravel()
 
     dt = format_time(time.time()-t0)
-    print(f'\nClassified {len(text)} texts in {dt}s ({dt/len(text)}s/text)')
+    print(f'\nClassified {len(text)} texts in {dt} 
+            ({(time.time()-t0)/len(text)}s/text)')
 
     return pred_cats1, pred_cats2
