@@ -15,10 +15,10 @@ def get_topics(fp):
     text = [' '.join([sub['title'], sub['text']]) 
             for sub in df.parsed_article if sub]
 
-    print(len(text[:100]), text[100])
+    # print(len(text[:100]), text[100])
 
-    # pred1, pred2 = predict_pipeline(text[:100])
-    # print(pred1, pred2)
+    pred1, pred2 = predict_pipeline(text[:100])
+    print(pred1, pred2)
 
 
 def is_valid_file(parser, arg):
