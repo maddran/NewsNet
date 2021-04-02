@@ -32,6 +32,6 @@ if __name__ == "__main__":
                         nargs='+', help="full path of the parsed files to generate a network from")
 
     args = parser.parse_args()
-    print(args.parsed_files)
+    fps = args.parsed_files
 
-    get_topics(args.parsed_files[0])
+    (get_topics(fp) for fp in fps)
