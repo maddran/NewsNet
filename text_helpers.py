@@ -47,7 +47,7 @@ def predict(data_loader, model, device):
     for batch in data_loader:
         input_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
-
+        print(batch['input_ids'])
         with torch.no_grad(): 
             outputs = model(input_ids, 
                             attention_mask=attention_mask, 
@@ -55,7 +55,7 @@ def predict(data_loader, model, device):
 
         logits = outputs[0]                   
         logits = logits.detach().cpu().numpy()
-        print(outputs.items())
+        
         predictions.append(logits)
 
     return predictions
