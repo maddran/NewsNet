@@ -78,8 +78,14 @@ def kth_largest(predictions_i, k, le=get_le()):
     return preds
 
 
-def predict_pipeline(text, model):
+def predict_pipeline(text, model_path='news_classifier.pt'):
 
+    if torch.cuda.is_available():
+        model = torch.load(model_path)
+    else:
+        model = torch.load(model_path, 
+                            map_location=lambda storage, location: storage)
+    
     le = get_le()
 
     print("Downloading XLM-Roberta Tokenizer...")
