@@ -103,7 +103,7 @@ def predict_pipeline(text, model_path='news_classifier.pt'):
     predictions = predict(loader, model, device)
 
     preds = [np.argmax(predictions[i], axis=1).flatten()
-            for i in range(len(text))]
+            for i in range(len(predictions))]
     flat_preds = np.concatenate(preds).ravel()
     pred_cats1 = le.inverse_transform(flat_preds)
 
