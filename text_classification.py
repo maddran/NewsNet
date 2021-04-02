@@ -31,5 +31,6 @@ if __name__ == "__main__":
                         nargs='+', help="full path of the parsed files to generate a network from")
 
     args = parser.parse_args()
+    print(args.parsed_files)
 
     _ = (get_topics(fp) for fp in args.parsed_files)
