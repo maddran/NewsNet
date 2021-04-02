@@ -47,6 +47,7 @@ def predict(data_loader, model, device):
     for batch in data_loader:
         input_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
+
         with torch.no_grad(): 
             outputs = model(input_ids, 
                             attention_mask=attention_mask, 
@@ -78,6 +79,8 @@ def kth_largest(predictions_i, k, le=get_le()):
 
 
 def predict_pipeline(text, model_path='news_classifier.pt'):
+
+    t0 = time.time()
 
     if torch.cuda.is_available():
         model = torch.load(model_path)
@@ -111,5 +114,8 @@ def predict_pipeline(text, model_path='news_classifier.pt'):
     pred_cats2 = [kth_largest(predictions[i], 2, le).flatten()
                     for i in range(len(predictions))]
     pred_cats2 = np.concatenate(pred_cats2).ravel()
+
+    dt = format_time(time.time()-t0)
+    print(f'\nClassified {len(text)} texts in {dt}s ({dt/len(text)}s/text)')
 
     return pred_cats1, pred_cats2
