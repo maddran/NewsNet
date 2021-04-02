@@ -15,7 +15,7 @@ def get_topics(fp):
     text = [' '.join([sub['title'], sub['text']]) 
             if sub else None for sub in df.parsed_article]
 
-    pred1, pred2 = predict_pipeline(text[10])
+    pred1, pred2 = predict_pipeline(text[:100])
     print(pred1, pred2)
 
 
