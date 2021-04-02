@@ -32,4 +32,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    (get_topics(fp) for fp in args.parsed_files)
+    _ = (get_topics(fp) for fp in args.parsed_files)
