@@ -55,7 +55,7 @@ def predict(data_loader, model, device):
 
         logits = outputs[0]                   
         logits = logits.detach().cpu().numpy()
-
+        print(outputs.shape)
         predictions.append(logits)
 
     return predictions
