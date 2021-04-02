@@ -12,12 +12,10 @@ def get_topics(fp):
     with open(fp, "rb") as pfile:
         df = pickle.load(pfile)
 
-    print(df.head())
     text = [' '.join([sub['title'], sub['text']]) 
             if sub else None for sub in df.parsed_article]
 
-    print('\n'.join(text[0:10]))
-    print('DONE!')
+    
 
 
 def is_valid_file(parser, arg):

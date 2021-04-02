@@ -7,6 +7,7 @@ dateparser
 fake-useragent
 fsspec
 fuzzywuzzy
+gdown
 googletrans
 graphviz
 htmldate
@@ -18,6 +19,7 @@ pandas
 partd
 pip-chill
 pylint
+pysocks
 python-levenshtein
 sentencepiece
 sklearn

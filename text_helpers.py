@@ -2,6 +2,7 @@
 import numpy as np
 import time
 import datetime
+import gdown
 
 from sklearn.preprocessing import LabelEncoder
 from transformers import XLMRobertaTokenizer
@@ -77,7 +78,9 @@ def kth_largest(predictions_i, k, le=get_le()):
     return preds
 
 
-def predict_pipeline(text, model, le=get_le()):
+def predict_pipeline(text, model):
+
+    le = get_le()
 
     print("Downloading XLM-Roberta Tokenizer...")
     tokenizer = XLMRobertaTokenizer.from_pretrained('xlm-roberta-base')
