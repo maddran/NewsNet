@@ -111,6 +111,6 @@ def predict_pipeline(text, model_path='news_classifier.pt'):
                     for i in range(len(predictions))]
     pred_cats2 = np.concatenate(pred_cats2).ravel()
 
-    print(len(predictions), len(predicitons[0]))
+    print(len(predictions), len(predictions[0]))
 
     return pred_cats1, pred_cats2
