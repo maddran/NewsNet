@@ -31,3 +31,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    filepaths = args.parsed_files
+    (get_topics(fp) for fp in filepaths)
