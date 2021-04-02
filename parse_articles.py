@@ -48,7 +48,7 @@ def parse_date(article):
     date = find_date(article['url'])
 
     return date
-    
+
     # date = None
     # tag_matches = ['meta[itemprop*=date]', 'time',
     #                 'h1[class*=date]', 'h2[class*=date]',
@@ -62,7 +62,6 @@ def parse_date(article):
     #     if date:
     #         break
     # return date
-
     
 
 

@@ -20,5 +20,7 @@ pip-chill
 pylint
 python-levenshtein
 sentencepiece
+sklearn
 sqlalchemy
+torch
 transformers
