@@ -27,7 +27,7 @@ class Dataset(torch.utils.data.Dataset):
         return item
 
     def __len__(self):
-        return len(self.encodings)
+        return len(self.encodings['input_ids'])
 
 
 def format_time(elapsed):
@@ -47,7 +47,6 @@ def predict(data_loader, model, device):
     for batch in data_loader:
         input_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
-        print(batch['input_ids'])
         with torch.no_grad(): 
             outputs = model(input_ids, 
                             attention_mask=attention_mask, 
