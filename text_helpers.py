@@ -62,7 +62,7 @@ def predict(data_loader, model, device):
 
 def get_le():
     le = LabelEncoder()
-    le.classes_ = np.load('text_classes.npy')
+    le.classes_ = np.load('newsnet/text_classes.npy')
     return le
 
 
