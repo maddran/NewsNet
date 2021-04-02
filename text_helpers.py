@@ -100,7 +100,7 @@ def predict_pipeline(text, model_path='news_classifier.pt'):
     dataset = Dataset(encoded)
 
     loader = DataLoader(dataset, batch_size=batch_size)
-    predictions = predict(loader, model, device)[0]
+    predictions = predict(loader, model, device)
 
     preds = [np.argmax(predictions[i], axis=1).flatten()
             for i in range(len(predictions))]
@@ -111,6 +111,6 @@ def predict_pipeline(text, model_path='news_classifier.pt'):
                     for i in range(len(predictions))]
     pred_cats2 = np.concatenate(pred_cats2).ravel()
 
-    print(predictions[0][0])
+    print(np.array(predictions).shape)
 
     return pred_cats1, pred_cats2
