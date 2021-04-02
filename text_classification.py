@@ -13,10 +13,9 @@ def get_topics(fp):
         df = pickle.load(pfile)
 
     text = [' '.join([sub['title'], sub['text']]) 
-            if sub else None for sub in df.parsed_article]
-    valid_text = [t in text if t]
+            for sub in df.parsed_article if sub]
 
-    pred1, pred2 = predict_pipeline(valid_text[:100])
+    pred1, pred2 = predict_pipeline(text[:100])
     print(pred1, pred2)
 
 
