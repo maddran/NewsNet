@@ -16,6 +16,7 @@ def get_topics(fp):
             if sub else None for sub in df.parsed_article]
 
     print('\n'.join(text[0:10]))
+    print('DONE!')
 
 
 def is_valid_file(parser, arg):
