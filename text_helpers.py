@@ -3,6 +3,7 @@ import numpy as np
 import time
 import datetime
 import gdown
+from tqdm import tqdm
 
 from sklearn.preprocessing import LabelEncoder
 from transformers import XLMRobertaTokenizer
@@ -44,7 +45,7 @@ def format_time(elapsed):
 def predict(data_loader, model, device):
     predictions = []
 
-    for batch in data_loader:
+    for batch in tqdm(data_loader):
         input_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
 
