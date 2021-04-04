@@ -42,10 +42,10 @@ def format_time(elapsed):
     return str(datetime.timedelta(seconds=elapsed_rounded))
     
 
-def predict(data_loader, model, device):
+def predict(data_loader, model, device, fname=None):
     predictions = []
 
-    for batch in tqdm(data_loader):
+    for batch in tqdm(data_loader, desc=f"Classifying {fname if fname else ''}"):
         input_ids = batch['input_ids'].to(device)
         attention_mask = batch['attention_mask'].to(device)
 
@@ -79,7 +79,7 @@ def kth_largest(predictions_i, k, le=get_le()):
     return preds
 
 
-def predict_pipeline(text, model_path='news_classifier.pt'):
+def predict_pipeline(text, model_path='news_classifier.pt', fname=None):
 
     t0 = time.time()
 
@@ -103,7 +103,7 @@ def predict_pipeline(text, model_path='news_classifier.pt'):
     dataset = Dataset(encoded)
 
     loader = DataLoader(dataset, batch_size=batch_size)
-    predictions = predict(loader, model, device)
+    predictions = predict(loader, model, device, fname)
 
     preds = [np.argmax(predictions[i], axis=1).flatten()
             for i in range(len(predictions))]

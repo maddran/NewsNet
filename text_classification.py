@@ -11,14 +11,24 @@ from multiprocessing import Pool, cpu_count
 from text_helpers import predict_pipeline
 
 def get_topics(fp):
+
+    print("Classifying text from: {fp}")
+
     with open(fp, "rb") as pfile:
         df = pickle.load(pfile)
 
-    text = [' '.join([sub['title'], sub['text']]) 
-            for sub in df.parsed_article if sub]
+    out_df = df[df.parsed_article.notnull()]
 
-    pred1, pred2 = predict_pipeline(text[:1000])
-    print(pred1, pred2)
+    text = [' '.join([sub['title'], sub['text']]) 
+            for sub in out_df.parsed_article if sub]
+
+    pred1, pred2 = predict_pipeline(text[:1000], fname=fp)
+    
+    out_df['topic1'] = pred1
+    out_df['topic2'] = pred2
+
+    new_file = f"{fp.split('.pkl')[0]}_topics.pkl"
+    out_df.to_pickle(new_file)
 
 
 def is_valid_file(parser, arg):
