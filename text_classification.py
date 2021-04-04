@@ -6,6 +6,8 @@ from glob import glob
 import pandas as pd
 import pickle
 from tqdm import tqdm 
+from multiprocessing import Pool, cpu_count
+
 from text_helpers import predict_pipeline
 
 def get_topics(fp):
@@ -33,4 +35,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     fps = args.parsed_files
 
-    [get_topics(fp) for fp in fps]
+    with Pool(cpu_count()) as pool:
+        _ = pool.map(get_topics, args.parsed_files)
+    
+    # [get_topics(fp) for fp in fps]
