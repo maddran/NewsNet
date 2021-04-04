@@ -33,9 +33,9 @@ if __name__ == "__main__":
                         nargs='+', help="full path of the parsed files to generate a network from")
 
     args = parser.parse_args()
-    fps = args.parsed_files
+    fps = args.files
 
     with Pool(cpu_count()) as pool:
-        _ = pool.map(get_topics, args.parsed_files)
+        _ = pool.map(get_topics, args.files)
     
     # [get_topics(fp) for fp in fps]
