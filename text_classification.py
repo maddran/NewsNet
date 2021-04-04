@@ -45,9 +45,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     fps = args.files
 
-    cpu = min(cpu_count(), 4)
-
-    with Pool(cpu) as pool:
+    with Pool(2) as pool:
         _ = pool.map(get_topics, args.files)
     
     # [get_topics(fp) for fp in fps]
