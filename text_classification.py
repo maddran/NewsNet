@@ -29,7 +29,7 @@ def is_valid_file(parser, arg):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--parsed_files", required=True, type=lambda x: is_valid_file(parser, x),
+    parser.add_argument("--files", required=True, type=lambda x: is_valid_file(parser, x),
                         nargs='+', help="full path of the parsed files to generate a network from")
 
     args = parser.parse_args()
