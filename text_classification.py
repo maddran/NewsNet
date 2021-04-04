@@ -12,7 +12,7 @@ from text_helpers import predict_pipeline
 
 def get_topics(fp):
 
-    print("Classifying text from: {fp}")
+    print(f"Classifying text from: {fp}")
 
     with open(fp, "rb") as pfile:
         df = pickle.load(pfile)
@@ -45,7 +45,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     fps = args.files
 
-    with Pool(cpu_count()) as pool:
+    cpu = max(cpu_count(), 8)
+
+    with Pool(cpu) as pool:
         _ = pool.map(get_topics, args.files)
     
     # [get_topics(fp) for fp in fps]
