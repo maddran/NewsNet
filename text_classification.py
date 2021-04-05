@@ -13,6 +13,9 @@ from text_helpers import predict_pipeline
 def get_topics(fp):
 
     print(f"Classifying text from: {fp}")
+    new_file = f"{fp.split('.pkl')[0]}_topics.pkl"
+    if os.path.exists(new_file):
+        return
 
     with open(fp, "rb") as pfile:
         df = pickle.load(pfile)
@@ -27,7 +30,6 @@ def get_topics(fp):
     out_df['topic1'] = pred1
     out_df['topic2'] = pred2
 
-    new_file = f"{fp.split('.pkl')[0]}_topics.pkl"
     out_df.to_pickle(new_file)
 
 
