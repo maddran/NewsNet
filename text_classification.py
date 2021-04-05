@@ -45,7 +45,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     fps = args.files
 
-    with Pool(2) as pool:
-        _ = pool.map(get_topics, args.files)
+    # with Pool(2) as pool:
+    #     _ = pool.map(get_topics, args.files)
     
-    # [get_topics(fp) for fp in fps]
+    [get_topics(fp) for fp in fps]
