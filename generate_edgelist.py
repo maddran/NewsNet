@@ -9,7 +9,7 @@ def get_links(i, file, source_tlds):
     df = pd.read_pickle(file)
     df = df[df['parsed_article'].notna()]
     df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
-    df_res = pd.concat([df.loc[:,['index', 'top_level_domain']],
+    df_res = pd.concat([df.loc[:,['index', 'top_level_domain','topic1', 'topic2']],
                         df_articles.loc[:,['external_links', 'parsed_date']]], axis = 1)
     df_res = df_res[df_res['external_links'].notna()]
     df_res = df_res.explode('external_links').reset_index(drop=True)
