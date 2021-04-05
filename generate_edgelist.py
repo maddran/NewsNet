@@ -19,7 +19,7 @@ def get_links(i, file, source_tlds):
 
     print(f"\nDone {i+1} files. {len(df_res)} total links found in {file}")
 
-    return df_res.loc[:,['from_index', 'to_index', 'parsed_date']]
+    return df_res.loc[:, ['from_index', 'to_index', 'parsed_date', 'topic1', 'topic2']]
 
 def get_source_tlds(df):
     tlds = list(df['url'].apply(extract_domain))
@@ -106,3 +106,4 @@ if __name__ == "__main__":
 
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
     links_df.to_csv(f"edgelist/edgelist_{now}.csv", sep="\t", index=False)
+    print(links_df.sample(10))
