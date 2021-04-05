@@ -14,7 +14,7 @@ def get_links(i, file, source_tlds):
     df_res = df_res[df_res['external_links'].notna()]
     df_res = df_res.explode('external_links').reset_index(drop=True)
     df_res = df_res[df_res['external_links'].isin(source_tlds.keys())]
-    df_res.columns = ['from_index', 'from_tld', 'to_tld', 'parsed_date']
+    df_res.columns = ['from_index', 'from_tld', 'topic1', 'topic2', 'to_tld', 'parsed_date']
     df_res['to_index'] = [source_tlds[tld] for tld in df_res['to_tld']]
 
     print(f"\nDone {i+1} files. {len(df_res)} total links found in {file}")
