@@ -291,7 +291,12 @@ if __name__ == "__main__":
                         help="starts local cluster")
     parser.add_argument("--visualize", action='store_true',
                         help="skips computation and outputs graph (requires graphviz installed)")
-    args = parser.parse_args()
+    
+    try:
+        args = parser.parse_args()
+    except:
+        parser.print_help()
+        sys.exit(0)
 
     main(args)
 
