@@ -43,31 +43,6 @@ def download(url: str, fname: str):
             size = file.write(data)
             bar.update(size)
 
-@dask.delayed
-def get_GDELT_data(tmpdir, wrkdir, date_string):
-
-    url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
-
-    filename = f"{tmpdir}/{url.split('/')[-1]}"
-
-    download(url, filename)
-
-    sprint(f"\n\nSaved {filename}...")
-        
-    fileout = filename.split(".")[0] + ".txt"
-
-    with gzip.open(filename, 'rb') as f_in:
-        with open(fileout, 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
-
-    os.remove(filename)
-
-    sprint(f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
-
-    db_path = populate_sql(fileout, wrkdir, date_string)
-
-    return db_path
-
 def populate_sql(file, wrkdir, date_string):
     
     j = 1
@@ -129,6 +104,42 @@ def get_matches(match_row, idx_LU = get_target_sources()):
         match = process.extractOne(to_match_url, filtered_LU, scorer = fuzz.ratio)
         return (LU.index(match[0]), match[0], match[1])
 
+def get_article_links(source, urls_database, date_string):
+    gdelt_url = f'"{source.gdelt_url}"'
+    tld = source.top_level_domain
+    query = f"""SELECT LinkURL FROM urls_table WHERE FrontPageURL = {gdelt_url}"""
+    links = pd.read_sql_query(query, urls_database)
+    links['top_level_domain'] = links['LinkURL'].map(extract_domain)
+    return list(set(links[links.top_level_domain == tld].LinkURL))
+
+
+@dask.delayed
+def get_GDELT_data(tmpdir, wrkdir, date_string):
+
+    url = f"http://data.gdeltproject.org/gdeltv3/gfg/alpha/{date_string}.LINKS.TXT.gz"
+
+    filename = f"{tmpdir}/{url.split('/')[-1]}"
+
+    download(url, filename)
+
+    sprint(f"\n\nSaved {filename}...")
+
+    fileout = filename.split(".")[0] + ".txt"
+
+    with gzip.open(filename, 'rb') as f_in:
+        with open(fileout, 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+    os.remove(filename)
+
+    sprint(
+        f"\n\nDeleted {filename.split('/')[-1]} and saved {fileout.split('/')[-1]}...")
+
+    db_path = populate_sql(fileout, wrkdir, date_string)
+    db_url = f"sqlite:///{db_path}"
+
+    return db_url
+
 @dask.delayed
 def match_urls(db_file, target_sources_path, date_string):  
 
@@ -161,15 +172,6 @@ def match_urls(db_file, target_sources_path, date_string):
     res.reset_index(inplace=True)
 
     return res
-    
-
-def get_article_links(source, urls_database, date_string):
-    gdelt_url = f'"{source.gdelt_url}"'
-    tld = source.top_level_domain
-    query = f"""SELECT LinkURL FROM urls_table WHERE FrontPageURL = {gdelt_url}"""
-    links = pd.read_sql_query(query, urls_database)
-    links['top_level_domain'] = links['LinkURL'].map(extract_domain)
-    return list(set(links[links.top_level_domain == tld].LinkURL))
 
 @dask.delayed
 def collect_urls(matched, db_file, date_string):
@@ -245,15 +247,13 @@ def get_urls(dates, target_sources_path=None):
             print(f"\n\tURL file {date_string}_urls.pkl exists! Continuing...")
         else:
             if os.path.exists(db_path):
-                db_file = f"sqlite:///{db_path}"
+                db_url = f"sqlite:///{db_path}"
                 print(f"\n\tDB file {db_path} exists! Continuing...")
             else:
-                db_path = get_GDELT_data(tmpdir, wrkdir, date_string)
-                db_file = f"sqlite:///{db_path}"
-                print(f"\n\tDB file {db_file} saved!")
+                db_url = get_GDELT_data(tmpdir, wrkdir, date_string)
 
-            matched = match_urls(db_file, target_sources_path, date_string)
-            urls = collect_urls(matched, db_file, date_string)
+            matched = match_urls(db_url, target_sources_path, date_string)
+            urls = collect_urls(matched, db_url, date_string)
             urls_path = save_urls(urls, urls_path)
 
         res.append(urls_path)
