@@ -248,7 +248,8 @@ def get_urls(dates, target_sources_path=None):
                 db_file = f"sqlite:///{db_path}"
                 print(f"\n\tDB file {db_path} exists! Continuing...")
             else:
-                db_file = get_GDELT_data(tmpdir, wrkdir, date_string)
+                db_path = get_GDELT_data(tmpdir, wrkdir, date_string)
+                db_file = f"sqlite:///{db_path}"
 
             matched = match_urls(db_file, target_sources_path, date_string)
             urls = collect_urls(matched, db_file, date_string)
