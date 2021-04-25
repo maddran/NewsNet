@@ -55,7 +55,7 @@ def populate_sql(file, wrkdir, date_string):
     sprint(f"\n\nCreating SQLite DB from {file} at {tmp_db_path}...")
 
     for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, engine='python',
-                               encoding='utf-8', sep='\t', header=None, error_bad_lines=False),
+                               sep='\t', header=None, error_bad_lines=False),
                     desc=f"Populating {tmp_db_path.split('/')[-1]}", total = 10):
         df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
         df.index += j
