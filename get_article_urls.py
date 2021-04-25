@@ -221,6 +221,7 @@ def pruneLinks(urlfiles):
     pruned = pruned[pruned.num_links > 0]
 
     pruned_path = f"{urlfiles[-1].split('.')[0]}_pruned.pkl"
+    pruned_path = pruned_path.replace('raw_urls', 'pruned_urls')
     pruned.to_pickle(pruned_path)
 
     num_links_pruned = sum(pruned["num_links"])
