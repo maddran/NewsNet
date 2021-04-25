@@ -91,7 +91,7 @@ def populate_sql(file, wrkdir, date_string):
     urls_database.execute(f"CREATE INDEX urls_index ON urls_table(FrontPageURL)")
 
     os.remove(file)
-    final_db_path = f"wrkdir/tmp/{date_string}.db"
+    final_db_path = f"{wrkdir}/tmp/{date_string}.db"
     shutil.move(tmp_db_path.split('sqlite:///')[-1], 
                 final_db_path)
 
