@@ -240,7 +240,7 @@ def get_urls(dates, target_sources_path=None):
         date_string = date.strftime("%Y%m%d%H%M%S")
 
         db_path = f"{wrkdir}/tmp/{date_string}.db"
-        urls_path = f"{wrkdir}/data/{date_string}_urls.pkl"
+        urls_path = f"{wrkdir}/data/raw_urls/{date_string}_urls.pkl"
         if os.path.exists(urls_path):
             print(f"\n\tURL file {date_string}_urls.pkl exists! Continuing...")
         else:
@@ -250,6 +250,7 @@ def get_urls(dates, target_sources_path=None):
             else:
                 db_path = get_GDELT_data(tmpdir, wrkdir, date_string)
                 db_file = f"sqlite:///{db_path}"
+                print(f"\n\tDB file {db_file} saved!")
 
             matched = match_urls(db_file, target_sources_path, date_string)
             urls = collect_urls(matched, db_file, date_string)
