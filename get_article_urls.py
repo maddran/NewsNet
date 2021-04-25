@@ -63,7 +63,10 @@ def populate_sql(file, wrkdir, date_string):
         j = df.index[-1] + 1
 
 
-    urls_database.execute(f"CREATE INDEX urls_index ON urls_table(FrontPageURL)")
+    try:
+        urls_database.execute(f"CREATE INDEX urls_index ON urls_table(FrontPageURL)")
+    except Exception as e:
+        print(f"{e}\n\nContinuing...")
 
     os.remove(file)
     final_db_path = f"{wrkdir}/tmp/{date_string}.db"
