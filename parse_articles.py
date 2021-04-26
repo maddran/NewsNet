@@ -48,7 +48,7 @@ def parse_date(article):
     try:
         date = find_date(article['url'])
     except Exception as e:
-        sprint(e)
+        print(e)
         date = None
 
     return date
