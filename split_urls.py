@@ -10,6 +10,7 @@ def split_file(url_file, n):
     url_files =[]
     for i, s in enumerate(splits):
         filepath = f"{url_file.split('.')[0]}_{i}.pkl"
+        filepath = filepath.replace('pruned_urls', 'pruned_urls_split')
         s.to_pickle(filepath)
         url_files.append(filepath)
 
