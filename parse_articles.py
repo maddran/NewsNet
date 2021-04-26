@@ -45,7 +45,11 @@ def parse_html(article):
 
 
 def parse_date(article):
-    date = find_date(article['url'])
+    try:
+        date = find_date(article['url'])
+    except Exception as e:
+        sprint(e)
+        date = None
 
     return date
 
