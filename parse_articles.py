@@ -52,20 +52,6 @@ def parse_date(article):
         date = None
 
     return date
-
-    # date = None
-    # tag_matches = ['meta[itemprop*=date]', 'time',
-    #                 'h1[class*=date]', 'h2[class*=date]',
-    #                 'h3[class*=date]', 'p[class*=date]',
-    #                 'div[class*=date]']
-
-    # for match in tag_matches:
-    #     date_tag = soup.select_one(match)
-    #     if date_tag:
-    #         date = parse_date_tag(date_tag)
-    #     if date:
-    #         break
-    # return date
     
 
 
@@ -208,14 +194,19 @@ def launch_dask(urlfile):
         
 def main(args):
     urlfile = args.url_file
+
+    date_string = urlfile.split('/')[-1].split('.')[0]
+    filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
+
+    if os.path.exists(filename):
+        sprint(f"Parsed file already exists at {filename}! Continuing...")
+        return
     
     if not os.path.exists(f"{cwd()}/parsed"):
         os.mkdir(f"{cwd()}/parsed")
     
     parsed = launch_dask(urlfile)
-    date_string = urlfile.split('/')[-1].split('.')[0]
-    filename = f"{cwd()}/parsed/{date_string}_parsed.pkl"
-
+    
     if args.visualize:
         parsed.visualize(
             filename=f"parse_articles_graph_{date_string}.svg")
