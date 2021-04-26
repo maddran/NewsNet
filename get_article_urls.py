@@ -54,14 +54,18 @@ def populate_sql(file, wrkdir, date_string):
 
     sprint(f"\n\nCreating SQLite DB from {file} at {tmp_db_path}...")
 
-    for df in tqdm(pd.read_csv(file, chunksize=chunksize, iterator=True, quotechar='"',engine='python',
-                               sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False),
-                    desc=f"Populating {tmp_db_path.split('/')[-1]}", total = 10):
+    try:
+        chunks = pd.read_csv(file, chunksize=chunksize, iterator=True, quotechar='"', engine='python',
+                         sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False)
+    except:
+        chunks = pd.read_csv(file, chunksize=chunksize, iterator=True, quotechar='"', 
+                             sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False)
+
+    for df in tqdm(chunks, desc=f"Populating {tmp_db_path.split('/')[-1]}", total = 10):
         df.columns = ['Date', 'FrontPageURL', 'LinkID', 'LinkPerc', 'LinkURL', 'LinkText']  
         df.index += j
         df.to_sql(f"urls_table", urls_database, if_exists='append')
         j = df.index[-1] + 1
-
 
     try:
         urls_database.execute(f"CREATE INDEX urls_index ON urls_table(FrontPageURL)")
