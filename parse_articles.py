@@ -182,7 +182,7 @@ def parse_article(row):
     parsed_article = get_article(url) #[get_article(url, lang) for url in urls]
     if parsed_article:
         parsed_article = parse_html(parsed_article)#[parse_html(pa) for pa in parsed_articles]
-        parsed_article = translate(parsed_article, lang)#[translate(pa, lang) for pa in parsed_articles]
+        # parsed_article = translate(parsed_article, lang)#[translate(pa, lang) for pa in parsed_articles]
         
     row['parsed_article'] = parsed_article
 
