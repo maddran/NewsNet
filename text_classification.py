@@ -7,11 +7,12 @@ import pandas as pd
 import pickle
 from tqdm import tqdm 
 from multiprocessing import Pool, cpu_count
+import time
 
 from text_helpers import predict_pipeline
 
 def get_topics(fp):
-
+    t0 = time.time()
     print(f"Classifying text from: {fp}")
     new_file = f"{fp.split('.pkl')[0]}_topics.pkl"
     if os.path.exists(new_file):
@@ -31,6 +32,8 @@ def get_topics(fp):
     out_df['topic2'] = pred2
 
     out_df.to_pickle(new_file)
+
+    print(f"Saved {new_file}. Classification took {time.time()-t0}s.")
 
 
 def is_valid_file(parser, arg):
