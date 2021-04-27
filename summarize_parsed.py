@@ -22,9 +22,9 @@ for pf in parsed_files:
 
     print("\n\n", parsed.columns)
 
-    to_translate = sum(parsed.lang != 'en')
-    translated = parsed[parsed.title != parsed.translated_title]
-    translation_rate = sum([p != 'ERROR' for p in translated])*100/to_translate
+    # to_translate = sum(parsed.lang != 'en')
+    # translated = parsed[parsed.title != parsed.translated_title]
+    # translation_rate = sum([p != 'ERROR' for p in translated])*100/to_translate
 
     sep = "-"*20
     print(f"\n{sep}{pf.split('/')[-1][:8]}{sep}")
@@ -32,6 +32,6 @@ for pf in parsed_files:
     print(f"parse success rate = {round(success_rate,2)}%")
     print(f"date parse success rate = {round(date_parse_rate,2)}%")
     print(f"text parse success rate = {round(text_parse_rate,2)}%")
-    print(f"translation success rate = {round(translation_rate,2)}%")
+    # print(f"translation success rate = {round(translation_rate,2)}%")
 
     
