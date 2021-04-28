@@ -33,9 +33,19 @@ Optional - set up a virtual environment! This is always a good idea as it keeps 
 
 ### Step 1. Clone the NewsNet repository and install requirements
 
-Run the following command on your machine to clone 
+Open a Terminal window, navigate to an approriate directory, and run the following command on your machine to clone the NewsNet repository:
 
 `git clone https://github.com/maddran/newsnet`
+
+Move into the newly created 'newsnet' directory:
+
+`cd newsnet`
+
+Install the required modules listed in `requirements.txt`. **Note:** this could take several minutes depending on your network connection:
+
+`pip install -q --upgrade --user -r requirements.txt`
+
+### Step 2. Define source list and get article URLs
 
 
 
