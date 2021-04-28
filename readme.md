@@ -37,15 +37,19 @@ Open a Terminal window, navigate to an approriate directory, and run the followi
 
 `git clone https://github.com/maddran/newsnet`
 
-Move into the newly created 'newsnet' directory:
+Move into the newly created 'newsnet' directory using the command:
 
 `cd newsnet`
 
-Install the required modules listed in `requirements.txt`. **Note:** this could take several minutes depending on your network connection:
+Using the following command, install the required Python modules listed in `requirements.txt`. **Note:** this could take several minutes depending on your network connection:
 
 `pip install -q --upgrade --user -r requirements.txt`
 
 ### Step 2. Define source list and get article URLs
+
+**Option 1.** Use the predefined source list extracted from the [European Media Monitor](https://emm.newsbrief.eu/NewsBrief/sourceslist/en/list.html). This list contains metadata for over 8000 news sources (with a storng skew towards European sources). If you choose to go with this options, wherever you see `<sources_file>` within a command use `sources_emm.csv` instead.
+
+**Option 2.** 
 
 
 
