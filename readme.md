@@ -16,9 +16,27 @@ See the [Methodology](#-methodology) section for more details.
 
 This section provides an outline of how to get started with NewsNet.
 
-### 0. Pre-requisites
+### Step 0. Install Prerequisites
 
-This 
+Ensure you have a working installation of Python3. The following links may be useful:
+
+* [Check if Python3 is installed](https://phoenixnap.com/kb/check-python-version)
+* [Installing Python3](https://realpython.com/installing-python/)
+
+Ensure you have a working installation of Git. This will make getting setup much easier:
+
+* [Installing Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+
+Optional - set up a virtual environment! This is always a good idea as it keeps your local Python installation pristine:
+
+* [Creating virtual environments using `venv`](https://docs.python.org/3/library/venv.html)
+
+### Step 1. Clone the NewsNet repository and install requirements
+
+Run the following command on your machine to clone 
+
+`git clone https://github.com/maddran/newsnet`
+
 
 
 ## Methodology
