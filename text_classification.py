@@ -24,7 +24,6 @@ def get_topics(fp):
         df = pickle.load(pfile)
 
     out_df = df[df.parsed_article.notnull()]
-    del(df)
 
     text = [' '.join([sub['title'], sub['text']]) 
             for sub in out_df.parsed_article if sub]
