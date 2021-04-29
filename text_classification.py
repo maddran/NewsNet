@@ -19,9 +19,12 @@ def get_topics(fp):
         return
 
     print(f"Classifying text from: {fp}")
-    
-    with open(fp, "rb") as pfile:
-        df = pickle.load(pfile)
+    if os.path.getsize(fp) > 0:
+        with open(fp, "rb") as pfile:
+            df = pickle.load(pfile)
+    else:
+        print(f"{fp} was empty! Continuing...")
+        return
 
     out_df = df[df.parsed_article.notnull()]
 
