@@ -13,15 +13,18 @@ from text_helpers import predict_pipeline
 
 def get_topics(fp):
     t0 = time.time()
-    print(f"Classifying text from: {fp}")
+
     new_file = f"{fp.split('.pkl')[0]}_topics.pkl"
     if os.path.exists(new_file):
         return
 
+    print(f"Classifying text from: {fp}")
+    
     with open(fp, "rb") as pfile:
         df = pickle.load(pfile)
 
     out_df = df[df.parsed_article.notnull()]
+    df.del()
 
     text = [' '.join([sub['title'], sub['text']]) 
             for sub in out_df.parsed_article if sub]

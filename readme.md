@@ -53,12 +53,12 @@ The source list is a **tab separated** data file containing details about the ne
 
 **Option 2.** Define your own list of sources following the description provided below. Please ensure the list is presented in a **[tab separated file](https://en.wikipedia.org/wiki/Tab-separated_values)** to ensure no conflicts arise when parsing source metadata.
 
-The source list contains the following columns:
+The source list must contain the following columns:
 
 * `category` - defines the scope of the news source providing high level aggregation (e.g. Local, National, International)
 * `country` - full country name (e.g. Canada, Finland, United Kingdom)
 * `country_short` - two letter country code (e.g. CA, FI, UK)
-* `lang` - language of sources
+* `lang` - language of sources (e.g. French, Finnish, English)
 * `lang_short`- [two letter language code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
 * `name` - short name used to identify the source (e.g. nytimes, yle-finnish, bbc-sports)
 * `region` - high level regional aggregation (e.g. Africa, South Asia, Europe)
@@ -68,3 +68,4 @@ The source list contains the following columns:
 * `url` - the URL of the source (this URL must contain article links for the parsing step to work)
 
 ## Methodology
+
