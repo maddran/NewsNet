@@ -49,11 +49,11 @@ Using the following command, install the required Python modules listed in `requ
 
 The source list is a **tab separated** data file containing details about the news sources to be analysed. 
 
-**Option 1.** Use the predefined source list extracted from the [European Media Monitor](https://emm.newsbrief.eu/NewsBrief/sourceslist/en/list.html). This list contains metadata for over 8000 news sources (with a storng skew towards European sources). If you choose to go with this options, wherever you see `<sources_file>` within a command, use `sources_emm.csv` instead.
+**Option 1.** Use the predefined source list extracted from the [European Media Monitor](https://emm.newsbrief.eu/NewsBrief/sourceslist/en/list.html). This list contains metadata for over 8000 news sources (with a storng skew towards European sources). If you choose to go with this options, wherever you see `<sources_file>` within a command, use `sources_emm.csv` instead and proceed to [Step 3](#-step-3)
 
 **Option 2.** Define your own list of sources following the description provided below. Please ensure the list is presented in a **[tab separated file](https://en.wikipedia.org/wiki/Tab-separated_values)** to ensure no conflicts arise when parsing source metadata.
 
-The source list must contain the following columns:
+The source list must contain the following columns, named *exactly* as shown:
 
 * `category` - defines the scope of the news source providing high level aggregation (e.g. Local, National, International)
 * `country` - full country name (e.g. Canada, Finland, United Kingdom)
@@ -66,6 +66,8 @@ The source list must contain the following columns:
 * `text` - full name of source (e.g. The New York Times, YLE News Finnish, BBC Sports)
 * `type` - type of news sources (e.g. blog, newspaper, tv, radio)
 * `url` - the URL of the source (this URL must contain article links for the parsing step to work)
+
+Once you have the source list, 
 
 ## Methodology
 
