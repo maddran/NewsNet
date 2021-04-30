@@ -80,7 +80,7 @@ if __name__ == "__main__":
     link_dfs = [get_links(i, file, source_tlds) for i, file in enumerate(args.parsed_files)] 
     links_df = pd.concat(link_dfs, axis=0)
     
-    links_df["parsed_date"] = pd.to_datetime(links_df["parsed_date"], utc=True).dt.tz_localize(None)
+    links_df["parsed_date"] = pd.to_datetime(links_df["parsed_date"], errors='coerce', utc=True).dt.tz_localize(None)
 
     if args.start_date:
         print(
