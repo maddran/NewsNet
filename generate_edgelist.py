@@ -6,7 +6,11 @@ import tldextract
 from datetime import datetime, timedelta
 
 def get_links(i, file, source_tlds):
-    df = pd.read_pickle(file)
+    try:
+        df = pd.read_pickle(file)
+    except:
+        print(f"Count not load file {file}. Continuing...")
+        return
     df = df[df['parsed_article'].notna()]
     df_articles = pd.DataFrame(df['parsed_article'].values.tolist(), index = df.index)
     df_res = pd.concat([df.loc[:,['index', 'top_level_domain','topic1', 'topic2']],
