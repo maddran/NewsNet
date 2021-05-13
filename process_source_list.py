@@ -22,7 +22,7 @@ def get_source_locations(source_file):
 
   null_locs = source_df[source_df['lat'].isnull()]
   print(f"{(len(source_df)-len(null_locs))*100/len(source_df)}% of source locations found")
-  print(f"Distribution of missing loactions by country:\n{null_locs['country'].value_counts()}")
+  print(f"Distribution of missing locations by country:\n{null_locs['country'].value_counts()}")
 
 
 def call_geocoding(row):

@@ -54,13 +54,13 @@ Move into the newly created `newsnet` directory using the command:
 
 Using the following command, install the required Python modules listed in `requirements.txt`. **Note:** this could take several minutes depending on your network connection:
 
-`pip install -q --upgrade --user -r requirements.txt && cd ..`
+`pip install --upgrade --user -r requirements.txt --quiet && cd ..`
 
 ### Step 2. Define source list and get article URLs
 
 The source list is a **tab separated** data file containing details about the news sources to be analysed. 
 
-**Option 1.** Use the predefined source list extracted from the [European Media Monitor](https://emm.newsbrief.eu/NewsBrief/sourceslist/en/list.html). This list contains metadata for over 8000 news sources (with a storng skew towards European sources). If you choose to go with this options, wherever you see `<SOURCE_FILE>` within a command, use `newsnet\sources_emm.csv` instead and proceed to [Step 3](#-step-3)
+**Option 1.** Use the predefined source list extracted from the [European Media Monitor](https://emm.newsbrief.eu/NewsBrief/sourceslist/en/list.html). This list contains metadata for over 8000 news sources (with a storng skew towards European sources). If you choose to go with this options, wherever you see `<SOURCE_FILE>` within a command, use `newsnet\sources_emm.tsv` instead and proceed to [Step 3](#-step-3)
 
 **Option 2.** Define your own list of sources following the description provided below. Please ensure the list is presented in a **[tab separated file](https://en.wikipedia.org/wiki/Tab-separated_values)** to ensure no conflicts arise when parsing source metadata.
 
@@ -84,15 +84,18 @@ Once you have the source list,run the following command to download URLs from GD
 
 Where the arguments are defined as follows:
 
+* `<SOURCE_FILE>` - full file path of the tab separated source list file (either predefined or user generated)
 * `<START_DATE>` - the date of the first day in the period you wish to analyse. Must in the form `YYYYMMDD` - e.g. September 1, 2020 would be `20200901`
 * `<TIME_OF_DAY>` - defines the time of day to use when downloading GDELT FrontPage graph scrape. In 4 digit 24h format - e.g. 9am would be `0900` and 11pm would be `2300`. Defaults to `0900`.
-* `distribute` - flag attempts to parallelize the downloading and preperation of data. If you choose to use this flag please ensure you have **at least** 3GB of RAM for each core on your machine. i.e. 2 core system should have >= 6GB RAM,  4 core system should have >= 12GB RAM.
+* `distribute` - flag attempts to parallelize the downloading and preperation of data. If you choose to use this flag please ensure you have **at least 3GB of RAM for each core** on your machine. i.e. 2 core system should have >= 6GB RAM,  4 core system should have >= 12GB RAM.
 
 **N.B.** If you are using the predefined source list, each day of GDELT data will take approximately 15 mins to collect.
 
-If you wanted to analyse the link network for the predefined (EMM) source list for the time period of March 1, 2021 to March 10, 2021 (10 days), using the GDELT data scraped at noon each day, you would run the following command:
+To wrap up this step, if you wanted to analyse the link network for the predefined (EMM) source list for the time period of March 1, 2021 to March 10, 2021 (10 days), using the GDELT data scraped at noon each day, you would run the following command:
 
-`python3 newsnet\get_article_urls.py --source_file newsnet\sources_emm.csv --start_date 20210301 --num_days 10 --time_of_day 1200 --distribute`
+`python3 newsnet/get_article_urls.py --source_file newsnet\sources_emm.csv --start_date 20210301 --num_days 10 --time_of_day 1200 --distribute`
+
+### Step 3. Parse URLs
 
 ## Methodology
 
