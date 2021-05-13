@@ -162,6 +162,8 @@ def match_urls(db_file, target_sources_path, date_string):
 
     urls_database = create_engine(db_file)
 
+    print(target_sources_path)
+    input()
     target_sources = get_target_sources(target_sources_path)
 
     sprint("\n\nMatching target and GDELT URLs...\n")
