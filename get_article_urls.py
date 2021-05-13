@@ -51,7 +51,13 @@ def populate_sql(file, wrkdir, date_string):
     
     j = 1
     chunksize = int(1e6)
-    db_file = f"{tmp()}/{date_string}.db"
+
+    if tmp():
+        tmpdir = tmp()
+    else:
+        tmpdir = f"{wrkdir}/tmp"
+
+    db_file = f"{tmpdir}/{date_string}.db"
 
     tmp_db_path = f"sqlite:///{db_file}"
     urls_database = create_engine(tmp_db_path)
