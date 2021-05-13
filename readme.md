@@ -86,14 +86,14 @@ Where the arguments are defined as follows:
 
 * `<SOURCE_FILE>` - full file path of the tab separated source list file (either predefined or user generated)
 * `<START_DATE>` - the date of the first day in the period you wish to analyse. Must in the form `YYYYMMDD` - e.g. September 1, 2020 would be `20200901`
-* `<TIME_OF_DAY>` - defines the time of day to use when downloading GDELT FrontPage graph scrape. In 4 digit 24h format - e.g. 9am would be `0900` and 11pm would be `2300`. Defaults to `0900`.
+* `<TIME_OF_DAY>` - defines the time of day to use when downloading GDELT FrontPage graph scrape. Formatted as an integer - e.g. 9am would be `9` and 11pm would be `23`. Defaults to `9`.
 * `distribute` - flag attempts to parallelize the downloading and preperation of data. If you choose to use this flag please ensure you have **at least 3GB of RAM for each core** on your machine. i.e. 2 core system should have >= 6GB RAM,  4 core system should have >= 12GB RAM.
 
 **N.B.** If you are using the predefined source list, each day of GDELT data will take approximately 15 mins to collect.
 
 To wrap up this step, if you wanted to analyse the link network for the predefined (EMM) source list for the time period of March 1, 2021 to March 10, 2021 (10 days), using the GDELT data scraped at noon each day, you would run the following command:
 
-`python3 newsnet/get_article_urls.py --source_file newsnet\sources_emm.csv --start_date 20210301 --num_days 10 --time_of_day 1200 --distribute`
+`python3 newsnet/get_article_urls.py --source_file newsnet\sources_emm.csv --start_date 20210301 --num_days 10 --time_of_day 12 --distribute`
 
 ### Step 3. Parse URLs
 
