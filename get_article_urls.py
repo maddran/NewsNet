@@ -109,7 +109,7 @@ def get_target_sources(filepath = None):
 
     return target_sources
 
-def get_matches(match_row, idx_LU = get_target_sources()):
+def get_matches(match_row, idx_LU):
     to_match_url = match_row.gdelt_url
     to_match_tld = match_row.top_level_domain
     LU = list(idx_LU.url)
