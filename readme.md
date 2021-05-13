@@ -1,14 +1,17 @@
-# NewsNet
-
-NewsNet is a set of tools designed to mine, process, and analyse the link network of global news sources.
-
-- [NewsNet](#newsnet)
+# Table of Contents 
+[NewsNet](#newsnet)
   * [Background](#background)
   * [Getting Started](#getting-started)
     + [Step 0. Install Prerequisites](#step-0-install-prerequisites)
     + [Step 1. Clone the NewsNet repository and install requirements](#step-1-clone-the-newsnet-repository-and-install-requirements)
     + [Step 2. Define source list and get article URLs](#step-2-define-source-list-and-get-article-urls)
   * [Methodology](#methodology)
+
+# NewsNet
+
+NewsNet is a set of tools designed to mine, process, and analyse the link network of global news sources.
+
+
 
 ## Background
 
