@@ -252,6 +252,7 @@ def get_urls(dates, target_sources_path=None):
     os.makedirs(f"{wrkdir}/tmp", exist_ok=True)
     os.makedirs(f"{wrkdir}/data", exist_ok=True)
     os.makedirs(f"{wrkdir}/data/raw_urls", exist_ok=True)
+    os.makedirs(f"{wrkdir}/data/pruned_urls", exist_ok=True)
 
     if tmp():
         tmpdir = tmp()
