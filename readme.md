@@ -1,5 +1,5 @@
 # Table of Contents 
-[NewsNet](#newsnet)
+- [NewsNet](#newsnet)
   * [Background](#background)
   * [Getting Started](#getting-started)
     + [Step 0. Install Prerequisites](#step-0-install-prerequisites)
