@@ -2,6 +2,14 @@
 
 NewsNet is a set of tools designed to mine, process, and analyse the link network of global news sources.
 
+- [NewsNet](#newsnet)
+  * [Background](#background)
+  * [Getting Started](#getting-started)
+    + [Step 0. Install Prerequisites](#step-0-install-prerequisites)
+    + [Step 1. Clone the NewsNet repository and install requirements](#step-1-clone-the-newsnet-repository-and-install-requirements)
+    + [Step 2. Define source list and get article URLs](#step-2-define-source-list-and-get-article-urls)
+  * [Methodology](#methodology)
+
 ## Background
 
 NewsNet is comprised of three broad steps:
@@ -49,7 +57,7 @@ Using the following command, install the required Python modules listed in `requ
 
 The source list is a **tab separated** data file containing details about the news sources to be analysed. 
 
-**Option 1.** Use the predefined source list extracted from the [European Media Monitor](https://emm.newsbrief.eu/NewsBrief/sourceslist/en/list.html). This list contains metadata for over 8000 news sources (with a storng skew towards European sources). If you choose to go with this options, wherever you see `<sources_file>` within a command, use `sources_emm.csv` instead and proceed to [Step 3](#-step-3)
+**Option 1.** Use the predefined source list extracted from the [European Media Monitor](https://emm.newsbrief.eu/NewsBrief/sourceslist/en/list.html). This list contains metadata for over 8000 news sources (with a storng skew towards European sources). If you choose to go with this options, wherever you see `<SOURCE_FILE>` within a command, use `newsnet\sources_emm.csv` instead and proceed to [Step 3](#-step-3)
 
 **Option 2.** Define your own list of sources following the description provided below. Please ensure the list is presented in a **[tab separated file](https://en.wikipedia.org/wiki/Tab-separated_values)** to ensure no conflicts arise when parsing source metadata.
 
@@ -69,7 +77,7 @@ The source list must contain the following columns, named *exactly* as shown:
 
 Once you have the source list,run the following command to download URLs from GDELT:
 
-`python3 newsnet\get_article_urls.py --start_date <START_DATE> --num_days <NUM_DAYS> --time_of_day <TIME_OF_DAY> --distribute`
+`python3 newsnet\get_article_urls.py --source_file <SOURCE_FILE> --start_date <START_DATE> --num_days <NUM_DAYS> --time_of_day <TIME_OF_DAY> --distribute`
 
 Where the arguments are defined as follows:
 
@@ -79,9 +87,9 @@ Where the arguments are defined as follows:
 
 **N.B.** If you are using the predefined source list, each day of GDELT data will take approximately 15 mins to collect.
 
-If you wanted to analyse the link network for the predefined (EMM) source list for the time period of March 1, 2021 to March 10, 2021 (10 days), you would run the following command:
+If you wanted to analyse the link network for the predefined (EMM) source list for the time period of March 1, 2021 to March 10, 2021 (10 days), using the GDELT data scraped at noon each day, you would run the following command:
 
-`python3 newsnet\get_article_urls.py --start_date 20210301 --num_days 10 --time_of_day <TIME_OF_DAY> --distribute`
+`python3 newsnet\get_article_urls.py --source_file newsnet\sources_emm.csv --start_date 20210301 --num_days 10 --time_of_day 1200 --distribute`
 
 ## Methodology
 
