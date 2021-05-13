@@ -275,8 +275,9 @@ def main(args):
     start_date = start_date.replace(hour=args.time_of_day)
     num_days = args.num_days
     dates = [start_date + timedelta(i) for i in range(-2, num_days)]
+    source_path = args.source_file
 
-    res = get_urls(dates)
+    res = get_urls(dates, source_path)
     if args.visualize:
         dask.visualize(*res, filename='get_article_graph.svg')
     else:
@@ -288,9 +289,16 @@ def main(args):
 
     print("\n\nDone!\n\n")
 
+def is_valid_file(parser, arg):
+    if not os.path.exists(arg):
+        parser.error("The file %s does not exist!" % arg)
+    else:
+        return arg
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--source_file", required=True, type=lambda x: is_valid_file(parser, x),
+                        help="full path of the csv file containing the source list")
     parser.add_argument("--start_date", required=True, type=int,
                         help="the start date of the period to collect (yyyymmdd)")
     parser.add_argument("--num_days", required=True, type=int,

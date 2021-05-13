@@ -37,13 +37,13 @@ Open a Terminal window, navigate to an approriate directory, and run the followi
 
 `git clone https://github.com/maddran/newsnet`
 
-Move into the newly created 'newsnet' directory using the command:
+Move into the newly created `newsnet` directory using the command:
 
 `cd newsnet`
 
 Using the following command, install the required Python modules listed in `requirements.txt`. **Note:** this could take several minutes depending on your network connection:
 
-`pip install -q --upgrade --user -r requirements.txt`
+`pip install -q --upgrade --user -r requirements.txt && cd ..`
 
 ### Step 2. Define source list and get article URLs
 
@@ -67,7 +67,21 @@ The source list must contain the following columns, named *exactly* as shown:
 * `type` - type of news sources (e.g. blog, newspaper, tv, radio)
 * `url` - the URL of the source (this URL must contain article links for the parsing step to work)
 
-Once you have the source list, 
+Once you have the source list,run the following command to download URLs from GDELT:
+
+`python3 newsnet\get_article_urls.py --start_date <START_DATE> --num_days <NUM_DAYS> --time_of_day <TIME_OF_DAY> --distribute`
+
+Where the arguments are defined as follows:
+
+* `<START_DATE>` - the date of the first day in the period you wish to analyse. Must in the form `YYYYMMDD` - e.g. September 1, 2020 would be `20200901`
+* `<TIME_OF_DAY>` - defines the time of day to use when downloading GDELT FrontPage graph scrape. In 4 digit 24h format - e.g. 9am would be `0900` and 11pm would be `2300`. Defaults to `0900`.
+* `distribute` - flag attempts to parallelize the downloading and preperation of data. If you choose to use this flag please ensure you have **at least** 3GB of RAM for each core on your machine. i.e. 2 core system should have >= 6GB RAM,  4 core system should have >= 12GB RAM.
+
+**N.B.** If you are using the predefined source list, each day of GDELT data will take approximately 15 mins to collect.
+
+If you wanted to analyse the link network for the predefined (EMM) source list for the time period of March 1, 2021 to March 10, 2021 (10 days), you would run the following command:
+
+`python3 newsnet\get_article_urls.py --start_date 20210301 --num_days 10 --time_of_day <TIME_OF_DAY> --distribute`
 
 ## Methodology
 
