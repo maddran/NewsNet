@@ -89,7 +89,7 @@ def extract_domain(url):
 
 def get_target_sources(filepath = None):
     if filepath == None:
-        filepath = f'{cwd()}/sources_emm.csv'
+        filepath = f'{cwd()}/sources_emm.tsv'
 
     sprint(f"\n\nGetting target sources from {filepath}...\n")
 
@@ -167,7 +167,7 @@ def match_urls(db_file, target_sources_path, date_string):
     # tqdm.pandas()
 
     matched_urls = common_urls.copy()
-    matched_urls["matched_idx"], matched_urls["emm_url"], matched_urls["match_score"] = zip(*common_urls.apply(get_matches, axis = 1))
+    matched_urls["matched_idx"], matched_urls["emm_url"], matched_urls["match_score"] = zip(*common_urls.apply(lambda x: get_matches(x, target_sources), axis = 1))
 
     matched_urls = matched_urls[matched_urls.match_score >= 97.0] \
                     .sort_values('match_score', ascending=False) \
