@@ -95,6 +95,22 @@ To wrap up this step, if you wanted to analyse the link network for the predefin
 
 `python3 newsnet/get_article_urls.py --source_file newsnet\sources_emm.csv --start_date 20210301 --num_days 10 --time_of_day 12 --distribute`
 
+Once the URLs have been downloaded and processed, we are left with a directory `data` with the following structure:
+
+```
+data
+|__ raw_urls
+|   |   <RAW_URL_FILE_1>
+|   |   <RAW_URL_FILE_2>
+|   |        ...
+|   |   <RAW_URL_FILE_N>
+|__ pruned_urls
+|   |   <PRUNED_URL_FILE_1>
+|   |   <PRUNED_URL_FILE_2>
+|   |        ...
+|   |   <PRUNED_URL_FILE_N>
+```
+
 ### Step 3. Parse URLs
 
 ## Methodology
