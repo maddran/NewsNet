@@ -132,7 +132,17 @@ To parse news articles, we run the following script for each pruned URL file (de
 
 Assuming the file structure presented previously, we can call the above script in a loop as follows:
 
-`for FILE in data/parsed_urls/*; do python3 newsnet/parse_articles.py --url_file $FILE; done`
+`for FILE in data/pruned_urls/*; do python3 newsnet/parse_articles.py --url_file $FILE; done`
+
+Once the articles have been parsed, we are left with a directory `parsed` with the following structure:
+
+```
+parsed
+|   <PARSED_ARTICLES_FILE_1>
+|   <PARSED_ARTICLES_FILE_2>
+|           ...
+|   <PARSED_ARTICLES_FILE_N>
+```
 
 ## Parallelizing on SLURM cluster
 
