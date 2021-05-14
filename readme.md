@@ -143,6 +143,7 @@ parsed
 |           ...
 |   <PARSED_ARTICLES_FILE_N>
 ```
+Each `<PARSED_ARTICLES_FILE_N>` is a pickle file containing a dataframe where each row represents one parsed news article.
 
 ## Parallelizing on SLURM cluster
 
