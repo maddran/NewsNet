@@ -117,7 +117,24 @@ Where each:
 
 ### Step 3. Parse Articles
 
-Now that we have the 
+Now that we have the pruned URLs for each day in the analysis period, we can move on to processing and parsing the news articles at those URLs. This step involves rendering the HTML for each URL and parsing the page for data such as:
+
+* Article publish date
+* Article HTML
+* Article Headline
+* Article Text
+* Article Author
+* Embedded Links (internal and external)
+
+To parse news articles, we run the following script for each pruned URL file (denoted as `<PRUNED_URL_FILE>` below):
+
+`python3 newsnet/parse_articles.py --url_file <PRUNED_URL_FILE>`
+
+Assuming the file structure presented previously, we can call the above script in a loop as follows:
+
+`for FILE in data/parsed_urls/*; do python3 newsnet/parse_articles.py --url_file $FILE; done`
+
+## Parallelizing on SLURM cluster
 
 ## Methodology
 
