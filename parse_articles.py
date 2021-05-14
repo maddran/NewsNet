@@ -188,7 +188,7 @@ def launch_dask(urlfile):
     except:
         print(f"\n\nParsing {date_string} ...")
 
-    pruned = pd.read_pickle(urlfile)
+    pruned = pd.read_pickle(urlfile).explode('article_links')
     pruned['parsed_article'] = [{}]*len(pruned)
     ddf = dd.from_pandas(pruned, npartitions=10)
     parsed = ddf.apply(parse_article, axis=1, result_type='expand', meta=pruned)
