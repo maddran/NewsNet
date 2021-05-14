@@ -111,6 +111,10 @@ data
 |   |   <PRUNED_URL_FILE_N>
 ```
 
+Where each:
+* `<RAW_URL_FILE_N>` is the GDELT URLs for each day filtered to include on the sources present in the defined source list.
+* `<PRUNED_URL_FILE_N>` is the corresponding `<RAW_URL_FILE_N>` with any recurring URLs pruned out. This is the file that will be used to 
+
 ### Step 3. Parse URLs
 
 ## Methodology
