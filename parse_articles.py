@@ -114,8 +114,9 @@ def process_links(article):
 
 # @dask.delayed
 def get_article(url):
-    article = Article(url, keep_article_html=True)
+    
     try:
+        article = Article(url, keep_article_html=True)
         article.download()
         article.parse()
     except:
