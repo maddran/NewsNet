@@ -1,3 +1,6 @@
+from dask.distributed import Client
+from collections import Counter
+import csv
 import pandas as pd
 pd.options.mode.chained_assignment = None
 
@@ -12,8 +15,8 @@ from tqdm import tqdm
 from fuzzywuzzy import process, fuzz
 import tldextract
 import dask
-from dask.distributed import Client
-from collections import Counter
+
+csv.field_size_limit(sys.maxsize)
 
 def sprint(string):
     sys.stdout.write(string)
