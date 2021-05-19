@@ -134,6 +134,8 @@ Assuming the file structure presented previously, we can call the above script i
 
 `for FILE in data/pruned_urls/*; do python3 newsnet/parse_articles.py --url_file $FILE; done`
 
+**N.B.** parsing will take around 2 seconds per article. i.e. if you have 
+
 Once the articles have been parsed, we are left with a directory `parsed` with the following structure:
 
 ```
