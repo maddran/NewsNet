@@ -25,7 +25,7 @@ for group in grouped_files:
 
             parsed = pd.DataFrame([p for p in list(parsed) if p])
             num_articles = num_articles+[len(parsed)]
-            success_rate = success_rate + [num_articles*100/total_articles]
+            success_rate = success_rate + [len(parsed)*100/total_articles]
             date_parse_rate = date_parse_rate + [sum(pd.notna(parsed['parsed_date']))*100/total_articles]
             text_parse_rate = text_parse_rate + [(pd.notna(parsed['text']))*100/total_articles]
         except Exception as e:
