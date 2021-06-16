@@ -134,7 +134,7 @@ Assuming the file structure presented previously, we can call the above script i
 
 `for FILE in data/pruned_urls/*; do python3 newsnet/parse_articles.py --url_file $FILE; done`
 
-**N.B.** parsing will take around 2 seconds per article. i.e. if you have 
+**N.B.** parsing will take around 2 seconds per article. If you used the full source list from EMM you can expect to have around 100k article URLs to parse for each day in the analysis period; this corresponds to roughly 55.6h of computing required if each article URL was parsed sequentially. However, URL parsing is highly parallelizable and as such, the 
 
 Once the articles have been parsed, we are left with a directory `parsed` with the following structure:
 
