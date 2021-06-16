@@ -28,7 +28,7 @@ for group in grouped_files:
             success_rate = success_rate + [num_articles*100/total_articles]
             date_parse_rate = date_parse_rate + [sum(pd.notna(parsed['parsed_date']))*100/total_articles]
             text_parse_rate = text_parse_rate + [(pd.notna(parsed['text']))*100/total_articles]
-        except as e:
+        except Exception as e:
             print(f"Unable to read {pf}. Continuing...")
             print(e)
 
