@@ -12,9 +12,12 @@ grouped_files = [list(g) for k, g in groupby(parsed_files, key=lambda x: x.split
 
 for group in grouped_files:
     for pf in group:    
-        df = pd.read_pickle(pf)
-        parsed = df['parsed_article']
-        total_articles = len(parsed)
+        try:
+            df = pd.read_pickle(pf)
+            parsed = df['parsed_article']
+            total_articles = len(parsed)
+        except:
+            print(f"Unable to read {pf}. Continuing...")
 
         parsed = pd.DataFrame([p for p in list(parsed) if p])
         parsed['lang'] = df['lang_short']
