@@ -22,15 +22,17 @@ for group in grouped_files:
             df = pd.read_pickle(pf)
             parsed = df['parsed_article']
             total_articles = len(parsed)
+
+            parsed = pd.DataFrame([p for p in list(parsed) if p])
+            parsed['lang'] = df['lang_short']
+            num_articles.append(len(parsed))
+            success_rate.append(num_articles*100/total_articles)
+            date_parse_rate.append(sum(pd.notna(parsed['parsed_date']))*100/total_articles)
+            text_parse_rate.append((pd.notna(parsed['text']))*100/total_articles)
         except:
             print(f"Unable to read {pf}. Continuing...")
 
-        parsed = pd.DataFrame([p for p in list(parsed) if p])
-        parsed['lang'] = df['lang_short']
-        num_articles.append(len(parsed))
-        success_rate.append(num_articles*100/total_articles)
-        date_parse_rate.append(sum(pd.notna(parsed['parsed_date']))*100/total_articles)
-        text_parse_rate.append((pd.notna(parsed['text']))*100/total_articles)
+            
 
     # print("\n\n", parsed.columns)
 
