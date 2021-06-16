@@ -38,7 +38,7 @@ for group in grouped_files:
 
     sep = "-"*20
     print(f"\n{sep}{pf.split('/')[-1][:8]}{sep}")
-    print(f"# of articles parsed = {np.mean(num_articles)}")
+    print(f"# of articles parsed = {np.sum(num_articles)}")
     print(f"parse success rate = {round(np.mean(success_rate),2)}%")
     print(f"date parse success rate = {round(np.mean(date_parse_rate),2)}%")
     print(f"text parse success rate = {round(np.mean(text_parse_rate),2)}%")
