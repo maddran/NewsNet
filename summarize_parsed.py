@@ -48,7 +48,7 @@ for group in grouped_files:
     print(f"parse success rate = {np.round(np.mean(success_rate),2)}%")
     print(f"date parse success rate = {np.round(np.mean(date_parse_rate),2)}%")
     print(f"text parse success rate = {np.round(np.mean(text_parse_rate),2)}%")
-    print(f"lang count = {lang_count.groupby().sum()}")
+    print(f"lang count = {lang_count.groupby(level=0).sum()}")
 
 
     
