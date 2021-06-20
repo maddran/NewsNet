@@ -16,7 +16,7 @@ for group in grouped_files:
     success_rate = []
     date_parse_rate = []
     text_parse_rate = []
-    lang_count = None
+    lang_count = pd.Series()
 
     for pf in group:    
         try:
@@ -29,10 +29,8 @@ for group in grouped_files:
             success_rate = success_rate + [len(parsed)*100/total_articles]
             date_parse_rate = date_parse_rate + [sum(pd.notna(parsed['parsed_date']))*100/total_articles]
             text_parse_rate = text_parse_rate + [sum(pd.notna(parsed['text']))*100/total_articles]
-            if lang_count:
-                lang_count = df.lang.value_counts()
-            else:
-                lang_count.append(df.lang.value_counts())
+
+            lang_count = lang_count.append(df.lang.value_counts())
             
             print(f"Done {pf}")
 
