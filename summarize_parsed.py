@@ -30,7 +30,7 @@ for group in grouped_files:
             date_parse_rate = date_parse_rate + [sum(pd.notna(parsed['parsed_date']))*100/total_articles]
             text_parse_rate = text_parse_rate + [sum(pd.notna(parsed['text']))*100/total_articles]
 
-            lang_count = lang_count.append(df.lang.value_counts())
+            lang_count = lang_count.append(df.country.value_counts())
             
             print(f"Done {pf}")
 
@@ -48,7 +48,7 @@ for group in grouped_files:
     print(f"parse success rate = {np.round(np.mean(success_rate),2)}%")
     print(f"date parse success rate = {np.round(np.mean(date_parse_rate),2)}%")
     print(f"text parse success rate = {np.round(np.mean(text_parse_rate),2)}%")
-    print(f"lang count = {lang_count.groupby(level=0).sum()}")
+    print(f"country count = {lang_count.groupby(level=0).sum()}")
 
 
     
