@@ -9,7 +9,7 @@ parsed_files = sorted(glob(f"{cwd()}/parsed/*parsed.pkl"))
 if not parsed_files:
     parsed_files = sorted(glob(f"parsed/*parsed.pkl"))
 
-grouped_files = [list(g) for k, g in groupby(parsed_files, key=lambda x: x.split('/')[-1][:8])]
+grouped_files = [list(g) for k, g in groupby(parsed_files, key=lambda x: x.split('/')[-1][:6])]
 
 for group in grouped_files:
     num_articles = []
