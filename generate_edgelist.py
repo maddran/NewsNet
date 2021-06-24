@@ -109,5 +109,5 @@ if __name__ == "__main__":
     print(f"\n{len(links_df)} total links found. {round(parsed_date_prop,2)}% of publish dates found.")
 
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
-    links_df.to_pickle(f"edgelist/edgelist_{now}.pkl")
+    links_df.to_csv(f"edgelist/edgelist_{now}.csv", index=False)
     print(links_df.sample(10))
